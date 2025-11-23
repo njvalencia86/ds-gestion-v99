@@ -69,7 +69,7 @@ const LoginScreen = ({ auth }) => {
              <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-purple-600"></div>
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.18</span></h1>
+                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.19</span></h1>
                     <p className="text-slate-400 text-xs font-mono">SISTEMA DE ACCESO RESTRINGIDO</p>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -165,8 +165,10 @@ const App = () => {
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
                 .neon-text { text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
                 .neon-green-text { text-shadow: 0 0 10px rgba(74, 222, 128, 0.5); }
+                .neon-blue-text { text-shadow: 0 0 10px rgba(34, 211, 238, 0.5); }
                 .neon-box { box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
                 .neon-box-green { box-shadow: 0 0 20px rgba(74, 222, 128, 0.2); }
+                .neon-box-blue { box-shadow: 0 0 20px rgba(34, 211, 238, 0.2); }
                 .grid-bg { background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px); background-size: 20px 20px; }
             `}</style>
 
@@ -174,7 +176,7 @@ const App = () => {
             <div className="p-4 shadow-lg no-print sticky top-0 z-50 transition-colors duration-500 bg-black/90 backdrop-blur-md border-b border-cyan-900">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text">DS GESTIÓN <span className="text-orange-400">v5.18</span></h1>
+                        <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text">DS GESTIÓN <span className="text-orange-400">v5.19</span></h1>
                         <button onClick={() => signOut(auth)} className="bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white text-[10px] px-2 py-1 rounded border border-red-500/50 transition uppercase font-bold">SALIR</button>
                     </div>
                     <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
@@ -211,6 +213,7 @@ const TabButton = ({ id, label, icon, active, set, color }) => (
     </button>
 );
 
+// ... (TabDatabase se mantiene igual) ...
 const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, showNotify, COLLECTION_PATH }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchSaved, setSearchSaved] = useState(''); 
@@ -313,60 +316,32 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
     );
 };
 
-// =================================================================================================
-// 💵 TAB 2: FACTURACIÓN FUTURISTA (CON BUSCADOR INTELIGENTE)
-// =================================================================================================
-
-// --- NUEVO COMPONENTE: BUSCADOR DE LOTES EN FILA ---
+// ... (BatchSearch se mantiene igual)
 const BatchSearch = ({ batches, onAssign }) => {
     const [text, setText] = useState('');
     const [show, setShow] = useState(false);
-
-    const filtered = useMemo(() => {
-        if (!text) return batches;
-        return batches.filter(b => b.name.toLowerCase().includes(text.toLowerCase()));
-    }, [batches, text]);
-
+    const filtered = useMemo(() => { if (!text) return batches; return batches.filter(b => b.name.toLowerCase().includes(text.toLowerCase())); }, [batches, text]);
     return (
         <div className="relative w-full">
-            <input 
-                type="text" 
-                placeholder="🔍 Escribe para buscar..." 
-                className="w-full bg-slate-900/80 border border-slate-600 rounded text-[10px] p-2 text-white outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition"
-                value={text}
-                onChange={e => setText(e.target.value)}
-                onFocus={() => setShow(true)}
-                onBlur={() => setTimeout(() => setShow(false), 200)} // Delay para permitir click
-            />
+            <input type="text" placeholder="🔍 Escribe para buscar..." className="w-full bg-slate-900/80 border border-slate-600 rounded text-[10px] p-2 text-white outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition" value={text} onChange={e => setText(e.target.value)} onFocus={() => setShow(true)} onBlur={() => setTimeout(() => setShow(false), 200)} />
             {show && (
                 <div className="absolute left-0 top-full mt-1 w-full max-h-40 overflow-y-auto bg-slate-800 border border-slate-600 rounded shadow-2xl z-50 custom-scrollbar">
-                    {filtered.length === 0 ? (
-                        <div className="p-2 text-[10px] text-slate-500">Sin resultados</div>
-                    ) : (
-                        filtered.map(b => (
-                            <div 
-                                key={b.id} 
-                                className="p-2 text-[10px] text-slate-300 hover:bg-green-900/30 hover:text-green-400 cursor-pointer border-b border-slate-700 last:border-none"
-                                onClick={() => {
-                                    setText(b.name);
-                                    onAssign(b.id);
-                                }}
-                            >
-                                {b.name}
-                            </div>
-                        ))
-                    )}
+                    {filtered.length === 0 ? (<div className="p-2 text-[10px] text-slate-500">Sin resultados</div>) : (filtered.map(b => (<div key={b.id} className="p-2 text-[10px] text-slate-300 hover:bg-green-900/30 hover:text-green-400 cursor-pointer border-b border-slate-700 last:border-none" onClick={() => { setText(b.name); onAssign(b.id); }}>{b.name}</div>)))}
                 </div>
             )}
         </div>
     );
 };
 
+// =================================================================================================
+// 💵 TAB 2: FACTURACIÓN (v5.19 - CON AJUSTE A PESO)
+// =================================================================================================
 const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, showNotify, COLLECTION_PATH, currentPeriod }) => {
     const [rawInput, setRawInput] = useState('');
     const [processing, setProcessing] = useState(false);
     const [previewData, setPreviewData] = useState([]);
     const [confirmClear, setConfirmClear] = useState(false);
+    const [manyvidsCop, setManyvidsCop] = useState(''); // NUEVO ESTADO PARA EL VALOR REAL
 
     const uniqueBatches = useMemo(() => {
         const map = new Map();
@@ -388,6 +363,15 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
         });
         setPreviewData(results);
     }, [rawInput, inventory]);
+
+    // --- CÁLCULOS DEL AJUSTE ---
+    const billingStats = useMemo(() => {
+        const totalUSD = transactions.reduce((s,t)=>s+(t.usdValue||0),0);
+        const theoreticalCOP = totalUSD * trm;
+        const realCOP = parseFloat(manyvidsCop) || 0;
+        const adjustment = realCOP > 0 ? (realCOP - theoreticalCOP) : 0;
+        return { totalUSD, theoreticalCOP, realCOP, adjustment };
+    }, [transactions, trm, manyvidsCop]);
 
     const handleAssignToBatch = async (itemCode, batchId) => {
         const batch = uniqueBatches.find(b => b.id === batchId);
@@ -436,10 +420,25 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 no-print">
             <div className="lg:col-span-5 space-y-4">
-                <div className="bg-slate-800/80 p-4 rounded-xl shadow-lg border border-green-500/30 backdrop-blur-sm flex justify-between items-center neon-box-green">
-                    <span className="text-xs font-bold text-green-400 uppercase tracking-widest">TRM ACTIVA (COP)</span>
-                    <input type="number" value={trm} onChange={e => setTrm(parseFloat(e.target.value))} className="text-right font-mono font-black text-xl text-green-300 bg-transparent w-32 outline-none border-b border-green-500/50 focus:border-green-400 neon-green-text" />
+                <div className="flex gap-4">
+                    {/* TRM BOX */}
+                    <div className="bg-slate-800/80 p-4 rounded-xl shadow-lg border border-green-500/30 backdrop-blur-sm flex-1 flex flex-col justify-between items-center neon-box-green">
+                        <span className="text-[10px] font-bold text-green-400 uppercase tracking-widest mb-1">TRM (COP)</span>
+                        <input type="number" value={trm} onChange={e => setTrm(parseFloat(e.target.value))} className="text-center font-mono font-black text-xl text-green-300 bg-transparent w-full outline-none border-b border-green-500/50 focus:border-green-400 neon-green-text" />
+                    </div>
+                    {/* MANYVIDS REAL BOX */}
+                    <div className="bg-slate-800/80 p-4 rounded-xl shadow-lg border border-cyan-500/30 backdrop-blur-sm flex-1 flex flex-col justify-between items-center neon-box-blue">
+                        <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mb-1">MANYVIDS COP (REAL)</span>
+                        <input 
+                            type="number" 
+                            placeholder="0"
+                            value={manyvidsCop} 
+                            onChange={e => setManyvidsCop(e.target.value)} 
+                            className="text-center font-mono font-black text-xl text-cyan-300 bg-transparent w-full outline-none border-b border-cyan-500/50 focus:border-cyan-400 neon-blue-text" 
+                        />
+                    </div>
                 </div>
+
                 <div className="bg-black/40 p-6 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full blur-xl pointer-events-none"></div>
                     <div className="flex justify-between items-center mb-2">
@@ -447,7 +446,7 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                     </div>
                     <textarea 
                         className="w-full h-64 p-4 border border-slate-600 rounded-xl text-xs font-mono outline-none resize-none bg-slate-900/90 text-green-400 shadow-inner focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.3)] transition" 
-                        placeholder="SYSTEM READY... INGRESE DATOS DEL PDF..." 
+                        placeholder={`>> SYSTEM READY...\n>> INGRESE DATOS DEL PDF...\n\n6879166 — $5.39\n...`} 
                         value={rawInput} onChange={e => setRawInput(e.target.value)}
                     ></textarea>
                     <button onClick={handleProcess} disabled={processing || previewData.length === 0} className="w-full mt-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-black py-4 rounded-xl shadow-lg transition transform hover:scale-[1.02] disabled:opacity-50 tracking-widest">
@@ -469,9 +468,7 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                                             <td className="p-2 font-mono text-white">{row.code}</td>
                                             <td className="p-2 font-bold text-green-300">${row.value}</td>
                                             <td className="p-2">
-                                                {row.found ? <span className="text-green-500 font-bold">✓ OK</span> : 
-                                                <BatchSearch batches={uniqueBatches} onAssign={(batchId) => handleAssignToBatch(row.code, batchId)} />
-                                                }
+                                                {row.found ? <span className="text-green-500 font-bold">✓ OK</span> : <BatchSearch batches={uniqueBatches} onAssign={(batchId) => handleAssignToBatch(row.code, batchId)} />}
                                             </td>
                                         </tr>
                                     ))}
@@ -482,13 +479,21 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                 )}
 
                 <div className="bg-slate-800/80 rounded-xl shadow-lg border border-slate-600 p-6 flex flex-col h-[500px] backdrop-blur-sm">
-                    <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+                    <div className="flex justify-between items-start mb-4 border-b border-slate-700 pb-2">
                         <div>
                             <h3 className="font-bold text-white uppercase tracking-wider">Historial: <span className="text-green-400">{currentPeriod}</span></h3>
                             <p className="text-[10px] text-slate-400">Total Transacciones: {transactions.length}</p>
                         </div>
                         <div className="text-right">
-                            <span className="block text-2xl text-green-400 font-black neon-green-text">${transactions.reduce((s,t)=>s+(t.usdValue||0),0).toFixed(2)}</span>
+                            <span className="block text-2xl text-green-400 font-black neon-green-text">${billingStats.totalUSD.toFixed(2)} USD</span>
+                            <span className="text-[10px] text-slate-400 font-mono block">Teórico: ${billingStats.theoreticalCOP.toLocaleString('es-CO')}</span>
+                            
+                            {/* --- MUESTRA EL AJUSTE CALCULADO --- */}
+                            {billingStats.realCOP > 0 && (
+                                <div className={`mt-1 text-[10px] font-bold p-1 rounded ${billingStats.adjustment >= 0 ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'}`}>
+                                    💰 AJUSTE PARA DS: {billingStats.adjustment >= 0 ? '+' : ''}${Math.round(billingStats.adjustment).toLocaleString('es-CO')}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -504,10 +509,7 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
 
                     {transactions.length > 0 && (
                         <div className="mt-4 pt-4 border-t border-slate-700">
-                            <button 
-                                onClick={handleClearPeriod} 
-                                className={`w-full border font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 uppercase text-xs tracking-widest ${confirmClear ? 'bg-red-600 border-red-500 text-white animate-pulse shadow-[0_0_20px_rgba(220,38,38,0.6)]' : 'bg-red-900/20 border-red-900/50 text-red-400 hover:bg-red-900/40'}`}
-                            >
+                            <button onClick={handleClearPeriod} className={`w-full border font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 uppercase text-xs tracking-widest ${confirmClear ? 'bg-red-600 border-red-500 text-white animate-pulse shadow-[0_0_20px_rgba(220,38,38,0.6)]' : 'bg-red-900/20 border-red-900/50 text-red-400 hover:bg-red-900/40'}`}>
                                 {confirmClear ? '⚠️ ¿CONFIRMAR BORRADO TOTAL? ⚠️' : '💀 BORRAR TODO EL HISTORIAL'}
                             </button>
                         </div>
@@ -518,6 +520,7 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
     );
 };
 
+// ... (TabReports y TabAnalytics se mantienen igual) ...
 const TabReports = ({ transactions, trm, currentPeriod }) => {
     const report = useMemo(() => {
         const totals = {};
@@ -533,31 +536,7 @@ const TabReports = ({ transactions, trm, currentPeriod }) => {
                 <div><h1 className="text-4xl font-black text-white uppercase print:text-black">DS FILMATION</h1><p className="text-sm font-bold mt-1 text-slate-400 print:text-black">REPORTE MENSUAL</p></div>
                 <div className="text-right"><div className="text-xs font-bold text-slate-400 print:text-black">Periodo</div><div className="text-2xl font-mono font-bold text-white uppercase print:text-black">{currentPeriod}</div></div>
             </div>
-            <table className="w-full text-sm mb-8">
-                <thead className="bg-slate-900 text-white print:bg-slate-200 print:text-black">
-                    <tr>
-                        <th className="p-3 text-left">Modelo</th>
-                        <th className="p-3 text-right">USD</th>
-                        <th className="p-3 text-right">COP ({trm})</th>
-                    </tr>
-                </thead>
-                <tbody className="text-slate-300 print:text-black">
-                    {report.rows.map(r => (
-                        <tr key={r.name} className="border-b border-slate-700 even:bg-slate-700/30 print:border-slate-300 print:even:bg-slate-100">
-                            <td className="p-3 font-bold text-white print:text-black">{r.name}</td>
-                            <td className="p-3 text-right font-mono">${r.usd.toFixed(2)}</td>
-                            <td className="p-3 text-right font-bold">${r.cop.toLocaleString('es-CO')}</td>
-                        </tr>
-                    ))}
-                </tbody>
-                <tfoot className="bg-slate-900 font-bold text-white print:bg-slate-200 print:text-black">
-                    <tr>
-                        <td className="p-3">TOTAL</td>
-                        <td className="p-3 text-right">${report.totalUSD.toFixed(2)}</td>
-                        <td className="p-3 text-right">${report.totalCOP.toLocaleString('es-CO')}</td>
-                    </tr>
-                </tfoot>
-            </table>
+            <table className="w-full text-sm mb-8"><thead className="bg-slate-900 text-white print:bg-slate-200 print:text-black"><tr><th className="p-3 text-left">Modelo</th><th className="p-3 text-right">USD</th><th className="p-3 text-right">COP ({trm})</th></tr></thead><tbody className="text-slate-300 print:text-black">{report.rows.map(r => (<tr key={r.name} className="border-b border-slate-700 even:bg-slate-700/30 print:border-slate-300 print:even:bg-slate-100"><td className="p-3 font-bold text-white print:text-black">{r.name}</td><td className="p-3 text-right font-mono">${r.usd.toFixed(2)}</td><td className="p-3 text-right font-bold">${r.cop.toLocaleString('es-CO')}</td></tr>))}</tbody><tfoot className="bg-slate-900 font-bold text-white print:bg-slate-200 print:text-black"><tr><td className="p-3">TOTAL</td><td className="p-3 text-right">${report.totalUSD.toFixed(2)}</td><td className="p-3 text-right">${report.totalCOP.toLocaleString('es-CO')}</td></tr></tfoot></table>
             <div className="text-center no-print"><button onClick={() => window.print()} className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:scale-105 transition">IMPRIMIR REPORTE OFICIAL</button></div>
         </div>
     );
@@ -582,68 +561,12 @@ const TabAnalytics = ({ transactions, currentPeriod, availableModels, trm }) => 
     return (
         <div className="space-y-8 animate-fadeIn text-white">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="relative overflow-hidden bg-slate-800/80 border border-cyan-500/30 p-6 rounded-2xl neon-box">
-                    <div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">💰</div>
-                    <h3 className="text-cyan-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Total Facturado</h3>
-                    <div className="text-4xl font-black text-white mb-1 tracking-tight">${periodStats.totalUSD.toLocaleString('en-US', {minimumFractionDigits: 2})} <span className="text-lg text-slate-500">USD</span></div>
-                    <div className="text-sm font-mono text-cyan-300 opacity-80">≈ ${(periodStats.totalUSD * trm).toLocaleString('es-CO')} COP</div>
-                    <div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-cyan-500 h-full shadow-[0_0_10px_#22d3ee]" style={{ width: '100%' }}></div></div>
-                </div>
-                <div className="relative overflow-hidden bg-slate-800/80 border border-purple-500/30 p-6 rounded-2xl neon-box">
-                    <div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">🏆</div>
-                    <h3 className="text-purple-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Modelo Top (MVP)</h3>
-                    {periodStats.mvp ? (<><div className="text-3xl font-black text-white mb-1 truncate">{periodStats.mvp.name}</div><div className="text-xl font-bold text-purple-300">${periodStats.mvp.val.toFixed(2)} USD</div></>) : <div className="text-slate-500 italic">Sin datos aún</div>}
-                    <div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-purple-500 h-full shadow-[0_0_10px_#a855f7]" style={{ width: '75%' }}></div></div>
-                </div>
-                <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center">
-                    <h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3>
-                    <div className="text-3xl font-black text-white uppercase">{currentPeriod}</div>
-                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.18 SYSTEM</div>
-                </div>
+                <div className="relative overflow-hidden bg-slate-800/80 border border-cyan-500/30 p-6 rounded-2xl neon-box"><div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">💰</div><h3 className="text-cyan-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Total Facturado</h3><div className="text-4xl font-black text-white mb-1 tracking-tight">${periodStats.totalUSD.toLocaleString('en-US', {minimumFractionDigits: 2})} <span className="text-lg text-slate-500">USD</span></div><div className="text-sm font-mono text-cyan-300 opacity-80">≈ ${(periodStats.totalUSD * trm).toLocaleString('es-CO')} COP</div><div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-cyan-500 h-full shadow-[0_0_10px_#22d3ee]" style={{ width: '100%' }}></div></div></div>
+                <div className="relative overflow-hidden bg-slate-800/80 border border-purple-500/30 p-6 rounded-2xl neon-box"><div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">🏆</div><h3 className="text-purple-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Modelo Top (MVP)</h3>{periodStats.mvp ? (<><div className="text-3xl font-black text-white mb-1 truncate">{periodStats.mvp.name}</div><div className="text-xl font-bold text-purple-300">${periodStats.mvp.val.toFixed(2)} USD</div></>) : <div className="text-slate-500 italic">Sin datos aún</div>}<div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-purple-500 h-full shadow-[0_0_10px_#a855f7]" style={{ width: '75%' }}></div></div></div>
+                <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center"><h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3><div className="text-3xl font-black text-white uppercase">{currentPeriod}</div><div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.19 SYSTEM</div></div>
             </div>
-            
-            <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-3xl backdrop-blur-sm">
-                <h3 className="text-white text-lg font-bold uppercase tracking-widest mb-8 flex items-center gap-2"><span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>Rendimiento por Modelo</h3>
-                {periodStats.sortedModels.length === 0 ? (<div className="text-center py-10 text-slate-500">No hay actividad registrada en este periodo.</div>) : (
-                    <div className="space-y-4">
-                        {periodStats.sortedModels.map((item, idx) => {
-                            const maxVal = periodStats.sortedModels[0].val;
-                            const percent = (item.val / maxVal) * 100;
-                            const colors = ['bg-cyan-500', 'bg-purple-500', 'bg-pink-500', 'bg-orange-500'];
-                            const color = colors[idx % colors.length];
-                            return (
-                                <div key={item.name} className="relative group">
-                                    <div className="flex justify-between text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider"><span>#{idx+1} {item.name}</span><span className="text-white">${item.val.toFixed(2)}</span></div>
-                                    <div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 relative">
-                                        <div className={`h-full ${color} rounded-full relative transition-all duration-1000 ease-out group-hover:brightness-125`} style={{ width: `${percent}%` }}><div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div></div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
-
-            <div className="mt-8">
-                <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Tendencia Global (Últimos Meses)</h3>
-                <div className="flex items-end gap-2 h-32 opacity-80">
-                    {historyStats.map(h => {
-                        const max = Math.max(...historyStats.map(x => x.total));
-                        const hPercent = max > 0 ? (h.total / max) * 100 : 0;
-                        const isCurrent = h.month === currentPeriod;
-                        return (
-                            <div key={h.month} className="flex-1 flex flex-col justify-end items-center group">
-                                <div className="text-[10px] text-slate-400 mb-1 opacity-0 group-hover:opacity-100 transition">${Math.round(h.total)}</div>
-                                <div 
-                                    className={`w-full rounded-t-sm transition-all duration-500 ${isCurrent ? 'bg-cyan-400 shadow-[0_0_15px_#22d3ee]' : 'bg-slate-700 hover:bg-slate-600'}`} 
-                                    style={{ height: `${Math.max(hPercent, 5)}%` }}
-                                ></div>
-                                <div className={`text-[9px] mt-1 ${isCurrent ? 'text-cyan-400 font-bold' : 'text-slate-500'}`}>{h.month.split('-')[1]}</div>
-                            </div>
-                        )
-                    })}
-                </div>
-            </div>
+            <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-3xl backdrop-blur-sm"><h3 className="text-white text-lg font-bold uppercase tracking-widest mb-8 flex items-center gap-2"><span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>Rendimiento por Modelo</h3>{periodStats.sortedModels.length === 0 ? (<div className="text-center py-10 text-slate-500">No hay actividad registrada en este periodo.</div>) : (<div className="space-y-4">{periodStats.sortedModels.map((item, idx) => { const maxVal = periodStats.sortedModels[0].val; const percent = (item.val / maxVal) * 100; const colors = ['bg-cyan-500', 'bg-purple-500', 'bg-pink-500', 'bg-orange-500']; const color = colors[idx % colors.length]; return (<div key={item.name} className="relative group"><div className="flex justify-between text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider"><span>#{idx+1} {item.name}</span><span className="text-white">${item.val.toFixed(2)}</span></div><div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 relative"><div className={`h-full ${color} rounded-full relative transition-all duration-1000 ease-out group-hover:brightness-125`} style={{ width: `${percent}%` }}><div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div></div></div></div>); })}</div>)}</div>
+            <div className="mt-8"><h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Tendencia Global (Últimos Meses)</h3><div className="flex items-end gap-2 h-32 opacity-80">{historyStats.map(h => { const max = Math.max(...historyStats.map(x=>x.total)); const hPercent = max > 0 ? (h.total / max) * 100 : 0; const isCurrent = h.month === currentPeriod; return (<div key={h.month} className="flex-1 flex flex-col justify-end items-center group"><div className="text-[10px] text-slate-400 mb-1 opacity-0 group-hover:opacity-100 transition">${Math.round(h.total)}</div><div className={`w-full rounded-t-sm transition-all duration-500 ${isCurrent ? 'bg-cyan-400 shadow-[0_0_15px_#22d3ee]' : 'bg-slate-700 hover:bg-slate-600'}`} style={{ height: `${Math.max(hPercent, 5)}%` }}></div><div className={`text-[9px] mt-1 ${isCurrent ? 'text-cyan-400 font-bold' : 'text-slate-500'}`}>{h.month.split('-')[1]}</div></div>) })}</div></div>
         </div>
     );
 };
