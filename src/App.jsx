@@ -43,7 +43,7 @@ const getMonthOptions = () => {
 };
 
 // =================================================================================================
-// 🔒 COMPONENTE DE LOGIN (SEGURIDAD v5.9)
+// 🔒 COMPONENTE DE LOGIN AHORA (SEGURIDAD v5.9)
 // =================================================================================================
 const LoginScreen = ({ auth }) => {
     const [email, setEmail] = useState('');
