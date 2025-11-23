@@ -69,7 +69,7 @@ const LoginScreen = ({ auth }) => {
              <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-purple-600"></div>
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.9</span></h1>
+                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.11</span></h1>
                     <p className="text-slate-400 text-xs font-mono">SISTEMA DE ACCESO RESTRINGIDO</p>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -91,16 +91,14 @@ const LoginScreen = ({ auth }) => {
 };
 
 // =================================================================================================
-// 📱 APP PRINCIPAL (CORREGIDA)
+// 📱 APP PRINCIPAL
 // =================================================================================================
 const App = () => {
-    // 1. Estados (Hooks)
     const [db, setDb] = useState(null);
     const [auth, setAuth] = useState(null);
     const [user, setUser] = useState(null);
     const [isAuthReady, setIsAuthReady] = useState(false);
     
-    // Datos y UI
     const [inventoryList, setInventoryList] = useState([]); 
     const [transactions, setTransactions] = useState([]); 
     const [activeTab, setActiveTab] = useState('database'); 
@@ -109,7 +107,6 @@ const App = () => {
     const [availableModels, setAvailableModels] = useState(INITIAL_MODELOS);
     const [currentPeriod, setCurrentPeriod] = useState(new Date().toISOString().slice(0, 7));
 
-    // 2. Cálculos (useMemo) - ¡MOVIDOS AQUÍ ARRIBA PARA EVITAR EL ERROR!
     const inventoryMap = useMemo(() => {
         const map = {};
         inventoryList.forEach(item => map[item.itemId] = item.percentages);
@@ -121,7 +118,6 @@ const App = () => {
         return tPeriod === currentPeriod;
     }), [transactions, currentPeriod]);
 
-    // 3. Efectos (useEffect)
     useEffect(() => {
         try {
             const app = initializeApp(firebaseConfig);
@@ -151,7 +147,6 @@ const App = () => {
         setTimeout(() => setNotification(null), 5000);
     };
 
-    // 4. Renderizado Condicional (Returns) - ¡AHORA SÍ VAN AL FINAL!
     if (!isAuthReady) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-cyan-500 font-mono animate-pulse">CARGANDO SISTEMA...</div>;
     if (!user) return <LoginScreen auth={auth} />;
 
@@ -177,7 +172,7 @@ const App = () => {
             <div className={`p-4 shadow-lg no-print sticky top-0 z-50 transition-colors duration-500 ${activeTab === 'analytics' ? 'bg-black/90 backdrop-blur-md border-b border-cyan-900' : 'bg-slate-900 text-white'}`}>
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-4">
-                        <h1 className={`text-xl font-black tracking-tight ${activeTab === 'analytics' ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text' : ''}`}>DS GESTIÓN <span className="text-orange-400">v5.9</span></h1>
+                        <h1 className={`text-xl font-black tracking-tight ${activeTab === 'analytics' ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text' : ''}`}>DS GESTIÓN <span className="text-orange-400">v5.11</span></h1>
                         <button onClick={() => signOut(auth)} className="bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white text-[10px] px-2 py-1 rounded border border-red-500/50 transition uppercase font-bold">SALIR</button>
                     </div>
                     <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
@@ -224,6 +219,8 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
     const [editingBatchId, setEditingBatchId] = useState(null);
     const [newModelName, setNewModelName] = useState('');
     const [showNewModelInput, setShowNewModelInput] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null); // Estado para confirmación de borrado
+
     const filteredModels = availableModels.filter(m => m.toLowerCase().includes(searchTerm.toLowerCase()));
     const groupedInventory = useMemo(() => {
         const groups = {};
@@ -251,6 +248,30 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
         setSaving(false);
     };
 
+    // --- NUEVA FUNCIÓN DE BORRADO ---
+    const handleDeleteBatch = async (batchId) => {
+        if (confirmDeleteId === batchId) {
+            // Confirmado, procedemos a borrar
+            try {
+                const itemsToDelete = inventoryList.filter(i => i.batchId === batchId);
+                const batch = writeBatch(db);
+                itemsToDelete.forEach(item => {
+                    batch.delete(doc(db, `${COLLECTION_PATH}/item_owners`, item.itemId));
+                });
+                await batch.commit();
+                showNotify('success', 'Registro eliminado correctamente');
+                setConfirmDeleteId(null);
+            } catch (e) {
+                console.error(e);
+                showNotify('error', 'Error al eliminar');
+            }
+        } else {
+            // Primer clic, pedir confirmación
+            setConfirmDeleteId(batchId);
+            setTimeout(() => setConfirmDeleteId(null), 3000); // Se reinicia en 3s
+        }
+    };
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 no-print">
              <div className="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-fit">
@@ -264,7 +285,12 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
                 <div className="flex flex-wrap gap-1 mb-4 max-h-32 overflow-y-auto">
                     {filteredModels.map(m => (<button key={m} onClick={() => { if (selectedModels.includes(m)) { setSelectedModels(s => s.filter(x => x !== m)); const c = {...modelConfig}; delete c[m]; setModelConfig(c); } else { setSelectedModels(s => [...s, m]); } }} className={`text-[10px] px-2 py-1 rounded border ${selectedModels.includes(m) ? 'bg-indigo-600 text-white' : 'bg-white'}`}>{m}</button>))}
                 </div>
-                {selectedModels.map(m => (<div key={m} className="flex justify-between items-center mb-1 text-xs"><span className="font-bold">{m}</span><input type="number" className="w-16 border rounded text-right p-1" value={modelConfig[m]||''} onChange={e => setModelConfig({...modelConfig, [m]: parseFloat(e.target.value)})} placeholder="%" /></div>))}
+                {selectedModels.map(m => (
+                    <div key={m} className="flex justify-between items-center mb-1 text-xs">
+                        <span className="font-bold">{m}</span>
+                        <input type="number" className="w-16 bg-white text-indigo-900 border border-indigo-200 rounded text-right p-1 font-bold outline-none focus:ring-2 focus:ring-indigo-500" value={modelConfig[m]||''} onChange={e => setModelConfig({...modelConfig, [m]: parseFloat(e.target.value)})} placeholder="%" />
+                    </div>
+                ))}
                 <textarea className="w-full h-32 p-3 border rounded mt-4 text-xs font-mono bg-white text-slate-900" placeholder="Pega los códigos aquí..." value={rawIds} onChange={e => setRawIds(e.target.value)}></textarea>
                 <button onClick={handleSave} disabled={saving} className="w-full mt-4 bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700">{saving ? 'Guardando...' : 'GUARDAR REGISTRO'}</button>
              </div>
@@ -273,7 +299,16 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
                 {groupedInventory.map(g => (
                     <div key={g.batchId} className="border-b py-3 flex justify-between items-start">
                         <div><div className="font-bold text-slate-700">{g.batchName || 'Sin Nombre'}</div><div className="text-xs text-slate-400">{g.items.length} items - {new Date(g.createdAt?.seconds * 1000).toLocaleDateString()}</div></div>
-                        <button onClick={() => { setEditingBatchId(g.batchId); setBatchName(g.batchName); setRawIds(g.items.join('\n')); const mods = Object.keys(g.percentages).filter(k=>k!==EMPRESA); setSelectedModels(mods); const c={}; mods.forEach(m=>c[m]=g.percentages[m]); setModelConfig(c); }} className="text-indigo-600 text-xs font-bold bg-indigo-50 px-3 py-1 rounded">Editar</button>
+                        <div className="flex gap-2">
+                            <button onClick={() => { setEditingBatchId(g.batchId); setBatchName(g.batchName); setRawIds(g.items.join('\n')); const mods = Object.keys(g.percentages).filter(k=>k!==EMPRESA); setSelectedModels(mods); const c={}; mods.forEach(m=>c[m]=g.percentages[m]); setModelConfig(c); }} className="text-indigo-600 text-xs font-bold bg-indigo-50 px-3 py-1 rounded hover:bg-indigo-100 transition">Editar</button>
+                            {/* --- BOTÓN DE ELIMINAR INTELIGENTE --- */}
+                            <button 
+                                onClick={() => handleDeleteBatch(g.batchId)} 
+                                className={`text-xs font-bold px-3 py-1 rounded transition ${confirmDeleteId === g.batchId ? 'bg-red-600 text-white animate-pulse' : 'text-red-400 hover:bg-red-50'}`}
+                            >
+                                {confirmDeleteId === g.batchId ? '¿CONFIRMAR?' : 'Eliminar'}
+                            </button>
+                        </div>
                     </div>
                 ))}
              </div>
@@ -393,7 +428,7 @@ const TabAnalytics = ({ transactions, currentPeriod, availableModels, trm }) => 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="relative overflow-hidden bg-slate-800/80 border border-cyan-500/30 p-6 rounded-2xl neon-box"><div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">💰</div><h3 className="text-cyan-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Total Facturado</h3><div className="text-4xl font-black text-white mb-1 tracking-tight">${periodStats.totalUSD.toLocaleString('en-US', {minimumFractionDigits: 2})} <span className="text-lg text-slate-500">USD</span></div><div className="text-sm font-mono text-cyan-300 opacity-80">≈ ${(periodStats.totalUSD * trm).toLocaleString('es-CO')} COP</div><div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-cyan-500 h-full shadow-[0_0_10px_#22d3ee]" style={{ width: '100%' }}></div></div></div>
                 <div className="relative overflow-hidden bg-slate-800/80 border border-purple-500/30 p-6 rounded-2xl neon-box"><div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">🏆</div><h3 className="text-purple-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Modelo Top (MVP)</h3>{periodStats.mvp ? (<><div className="text-3xl font-black text-white mb-1 truncate">{periodStats.mvp.name}</div><div className="text-xl font-bold text-purple-300">${periodStats.mvp.val.toFixed(2)} USD</div></>) : <div className="text-slate-500 italic">Sin datos aún</div>}<div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-purple-500 h-full shadow-[0_0_10px_#a855f7]" style={{ width: '75%' }}></div></div></div>
-                <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center"><h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3><div className="text-3xl font-black text-white uppercase">{currentPeriod}</div><div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.9 SYSTEM</div></div>
+                <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center"><h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3><div className="text-3xl font-black text-white uppercase">{currentPeriod}</div><div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.11 SYSTEM</div></div>
             </div>
             <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-3xl backdrop-blur-sm"><h3 className="text-white text-lg font-bold uppercase tracking-widest mb-8 flex items-center gap-2"><span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>Rendimiento por Modelo</h3>{periodStats.sortedModels.length === 0 ? (<div className="text-center py-10 text-slate-500">No hay actividad registrada en este periodo.</div>) : (<div className="space-y-4">{periodStats.sortedModels.map((item, idx) => { const maxVal = periodStats.sortedModels[0].val; const percent = (item.val / maxVal) * 100; const colors = ['bg-cyan-500', 'bg-purple-500', 'bg-pink-500', 'bg-orange-500']; const color = colors[idx % colors.length]; return (<div key={item.name} className="relative group"><div className="flex justify-between text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider"><span>#{idx+1} {item.name}</span><span className="text-white">${item.val.toFixed(2)}</span></div><div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 relative"><div className={`h-full ${color} rounded-full relative transition-all duration-1000 ease-out group-hover:brightness-125`} style={{ width: `${percent}%` }}><div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div></div></div></div>); })}</div>)}</div>
             <div className="mt-8"><h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Tendencia Global (Últimos Meses)</h3><div className="flex items-end gap-2 h-32 opacity-80">{historyStats.map(h => { const max = Math.max(...historyStats.map(x=>x.total)); const hPercent = max > 0 ? (h.total / max) * 100 : 0; const isCurrent = h.month === currentPeriod; return (<div key={h.month} className="flex-1 flex flex-col justify-end items-center group"><div className="text-[10px] text-slate-400 mb-1 opacity-0 group-hover:opacity-100 transition">${Math.round(h.total)}</div><div className={`w-full rounded-t-sm transition-all duration-500 ${isCurrent ? 'bg-cyan-400 shadow-[0_0_15px_#22d3ee]' : 'bg-slate-700 hover:bg-slate-600'}`} style={{ height: `${Math.max(hPercent, 5)}%` }}></div><div className={`text-[9px] mt-1 ${isCurrent ? 'text-cyan-400 font-bold' : 'text-slate-500'}`}>{h.month.split('-')[1]}</div></div>) })}</div></div>
