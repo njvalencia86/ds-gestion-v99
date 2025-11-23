@@ -460,8 +460,35 @@ const TabReports = ({ transactions, trm, currentPeriod }) => {
 
     return (
         <div className="bg-white p-8 max-w-4xl mx-auto shadow-2xl print-content border border-slate-100">
-             <div className="mb-8 border-b-4 border-slate-800 pb-4 flex justify-between items-end print-header"><div><h1 className="text-4xl font-black text-slate-900 uppercase">DS FILMATION</h1><p className="text-sm font-bold mt-1">REPORTE MENSUAL</p></div><div className="text-right"><div className="text-xs font-bold text-slate-400">Periodo</div><div className="text-2xl font-mono font-bold text-slate-800 uppercase">{currentPeriod}</div></div></div>
-            <table className="w-full text-sm mb-8"><thead className="bg-slate-800 text-white"><tr><th className="p-3 text-left">Modelo</th><th className="p-3 text-right">USD</th><th className="p-3 text-right">COP ({trm})</th></tr></thead><tbody>{report.rows.map(r => (<tr key={r.name} className="border-b even:bg-slate-50"><td className="p-3 font-bold">{r.name}</td><td className="p-3 text-right font-mono">${r.usd.toFixed(2)}</td><td className="p-3 text-right font-bold">${r.cop.toLocaleString('es-CO')}</td></tr>))}</tbody><tfoot className="bg-slate-100 font-bold"><tr><td className="p-3">TOTAL</td><td className="p-3 text-right">${report.totalUSD.toFixed(2)}</td><td className="p-3 text-right">${report.totalCOP.toLocaleString('es-CO')}</td></tr></tfoot></table>
+             <div className="mb-8 border-b-4 border-slate-800 pb-4 flex justify-between items-end print-header">
+                <div><h1 className="text-4xl font-black text-slate-900 uppercase">DS FILMATION</h1><p className="text-sm font-bold mt-1">REPORTE MENSUAL</p></div>
+                <div className="text-right"><div className="text-xs font-bold text-slate-400">Periodo</div><div className="text-2xl font-mono font-bold text-slate-800 uppercase">{currentPeriod}</div></div>
+            </div>
+            <table className="w-full text-sm mb-8">
+                <thead className="bg-slate-800 text-white">
+                    <tr>
+                        <th className="p-3 text-left">Modelo</th>
+                        <th className="p-3 text-right">USD</th>
+                        <th className="p-3 text-right">COP ({trm})</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {report.rows.map(r => (
+                        <tr key={r.name} className="border-b even:bg-slate-50">
+                            <td className="p-3 font-bold">{r.name}</td>
+                            <td className="p-3 text-right font-mono">${r.usd.toFixed(2)}</td>
+                            <td className="p-3 text-right font-bold">${r.cop.toLocaleString('es-CO')}</td>
+                        </tr>
+                    ))}
+                </tbody>
+                <tfoot className="bg-slate-100 font-bold">
+                    <tr>
+                        <td className="p-3">TOTAL</td>
+                        <td className="p-3 text-right">${report.totalUSD.toFixed(2)}</td>
+                        <td className="p-3 text-right">${report.totalCOP.toLocaleString('es-CO')}</td>
+                    </tr>
+                </tfoot>
+            </table>
             <div className="text-center no-print"><button onClick={() => window.print()} className="bg-slate-900 text-white px-6 py-2 rounded-lg font-bold">IMPRIMIR REPORTE</button></div>
         </div>
     );
@@ -486,30 +513,62 @@ const TabAnalytics = ({ transactions, currentPeriod, availableModels, trm }) => 
     return (
         <div className="space-y-8 animate-fadeIn text-white">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="relative overflow-hidden bg-slate-800/80 border border-cyan-500/30 p-6 rounded-2xl neon-box"><div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">💰</div><h3 className="text-cyan-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Total Facturado</h3><div className="text-4xl font-black text-white mb-1 tracking-tight">${periodStats.totalUSD.toLocaleString('en-US', {minimumFractionDigits: 2})} <span className="text-lg text-slate-500">USD</span></div><div className="text-sm font-mono text-cyan-300 opacity-80">≈ ${(periodStats.totalUSD * trm).toLocaleString('es-CO')} COP</div><div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-cyan-500 h-full shadow-[0_0_10px_#22d3ee]" style={{ width: '100%' }}></div></div></div>
-                <div className="relative overflow-hidden bg-slate-800/80 border border-purple-500/30 p-6 rounded-2xl neon-box"><div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">🏆</div><h3 className="text-purple-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Modelo Top (MVP)</h3>{periodStats.mvp ? (<><div className="text-3xl font-black text-white mb-1 truncate">{periodStats.mvp.name}</div><div className="text-xl font-bold text-purple-300">${periodStats.mvp.val.toFixed(2)} USD</div></>) : <div className="text-slate-500 italic">Sin datos aún</div>}<div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-purple-500 h-full shadow-[0_0_10px_#a855f7]" style={{ width: '75%' }}></div></div></div>
-                <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center"><h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3><div className="text-3xl font-black text-white uppercase">{currentPeriod}</div><div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.12 SYSTEM</div></div>
+                <div className="relative overflow-hidden bg-slate-800/80 border border-cyan-500/30 p-6 rounded-2xl neon-box">
+                    <div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">💰</div>
+                    <h3 className="text-cyan-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Total Facturado</h3>
+                    <div className="text-4xl font-black text-white mb-1 tracking-tight">${periodStats.totalUSD.toLocaleString('en-US', {minimumFractionDigits: 2})} <span className="text-lg text-slate-500">USD</span></div>
+                    <div className="text-sm font-mono text-cyan-300 opacity-80">≈ ${(periodStats.totalUSD * trm).toLocaleString('es-CO')} COP</div>
+                    <div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-cyan-500 h-full shadow-[0_0_10px_#22d3ee]" style={{ width: '100%' }}></div></div>
+                </div>
+                <div className="relative overflow-hidden bg-slate-800/80 border border-purple-500/30 p-6 rounded-2xl neon-box">
+                    <div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">🏆</div>
+                    <h3 className="text-purple-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Modelo Top (MVP)</h3>
+                    {periodStats.mvp ? (<><div className="text-3xl font-black text-white mb-1 truncate">{periodStats.mvp.name}</div><div className="text-xl font-bold text-purple-300">${periodStats.mvp.val.toFixed(2)} USD</div></>) : <div className="text-slate-500 italic">Sin datos aún</div>}
+                    <div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-purple-500 h-full shadow-[0_0_10px_#a855f7]" style={{ width: '75%' }}></div></div>
+                </div>
+                <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center">
+                    <h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3>
+                    <div className="text-3xl font-black text-white uppercase">{currentPeriod}</div>
+                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.12 SYSTEM</div>
+                </div>
             </div>
-            <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-3xl backdrop-blur-sm"><h3 className="text-white text-lg font-bold uppercase tracking-widest mb-8 flex items-center gap-2"><span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>Rendimiento por Modelo</h3>{periodStats.sortedModels.length === 0 ? (<div className="text-center py-10 text-slate-500">No hay actividad registrada en este periodo.</div>) : (<div className="space-y-4">{periodStats.sortedModels.map((item, idx) => { const maxVal = periodStats.sortedModels[0].val; const percent = (item.val / maxVal) * 100; const colors = ['bg-cyan-500', 'bg-purple-500', 'bg-pink-500', 'bg-orange-500']; const color = colors[idx % colors.length]; return (<div key={item.name} className="relative group"><div className="flex justify-between text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider"><span>#{idx+1} {item.name}</span><span className="text-white">${item.val.toFixed(2)}</span></div><div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 relative"><div className={`h-full ${color} rounded-full relative transition-all duration-1000 ease-out group-hover:brightness-125`} style={{ width: `${percent}%` }}><div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div></div></div></div>); })}</div>)}</div>
             
-            {/* --- CÓDIGO EXPANDIDO PARA EVITAR ERRORES --- */}
+            <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-3xl backdrop-blur-sm">
+                <h3 className="text-white text-lg font-bold uppercase tracking-widest mb-8 flex items-center gap-2"><span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>Rendimiento por Modelo</h3>
+                {periodStats.sortedModels.length === 0 ? (<div className="text-center py-10 text-slate-500">No hay actividad registrada en este periodo.</div>) : (
+                    <div className="space-y-4">
+                        {periodStats.sortedModels.map((item, idx) => {
+                            const maxVal = periodStats.sortedModels[0].val;
+                            const percent = (item.val / maxVal) * 100;
+                            const colors = ['bg-cyan-500', 'bg-purple-500', 'bg-pink-500', 'bg-orange-500'];
+                            const color = colors[idx % colors.length];
+                            return (
+                                <div key={item.name} className="relative group">
+                                    <div className="flex justify-between text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider"><span>#{idx+1} {item.name}</span><span className="text-white">${item.val.toFixed(2)}</span></div>
+                                    <div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 relative">
+                                        <div className={`h-full ${color} rounded-full relative transition-all duration-1000 ease-out group-hover:brightness-125`} style={{ width: `${percent}%` }}><div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div></div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
             <div className="mt-8">
                 <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Tendencia Global (Últimos Meses)</h3>
                 <div className="flex items-end gap-2 h-32 opacity-80">
                     {historyStats.map(h => {
-                        const max = Math.max(...historyStats.map(x => x.total));
+                        const max = Math.max(...historyStats.map(x=>x.total));
                         const hPercent = max > 0 ? (h.total / max) * 100 : 0;
                         const isCurrent = h.month === currentPeriod;
                         return (
                             <div key={h.month} className="flex-1 flex flex-col justify-end items-center group">
                                 <div className="text-[10px] text-slate-400 mb-1 opacity-0 group-hover:opacity-100 transition">${Math.round(h.total)}</div>
-                                <div 
-                                    className={`w-full rounded-t-sm transition-all duration-500 ${isCurrent ? 'bg-cyan-400 shadow-[0_0_15px_#22d3ee]' : 'bg-slate-700 hover:bg-slate-600'}`} 
-                                    style={{ height: `${Math.max(hPercent, 5)}%` }}
-                                ></div>
+                                <div className={`w-full rounded-t-sm transition-all duration-500 ${isCurrent ? 'bg-cyan-400 shadow-[0_0_15px_#22d3ee]' : 'bg-slate-700 hover:bg-slate-600'}`} style={{ height: `${Math.max(hPercent, 5)}%` }}></div>
                                 <div className={`text-[9px] mt-1 ${isCurrent ? 'text-cyan-400 font-bold' : 'text-slate-500'}`}>{h.month.split('-')[1]}</div>
                             </div>
-                        );
+                        )
                     })}
                 </div>
             </div>
