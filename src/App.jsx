@@ -69,7 +69,7 @@ const LoginScreen = ({ auth }) => {
              <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-purple-600"></div>
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.16</span></h1>
+                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.17</span></h1>
                     <p className="text-slate-400 text-xs font-mono">SISTEMA DE ACCESO RESTRINGIDO</p>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -174,7 +174,7 @@ const App = () => {
             <div className="p-4 shadow-lg no-print sticky top-0 z-50 transition-colors duration-500 bg-black/90 backdrop-blur-md border-b border-cyan-900">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text">DS GESTIÓN <span className="text-orange-400">v5.16</span></h1>
+                        <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text">DS GESTIÓN <span className="text-orange-400">v5.17</span></h1>
                         <button onClick={() => signOut(auth)} className="bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white text-[10px] px-2 py-1 rounded border border-red-500/50 transition uppercase font-bold">SALIR</button>
                     </div>
                     <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
@@ -211,8 +211,12 @@ const TabButton = ({ id, label, icon, active, set, color }) => (
     </button>
 );
 
+// =================================================================================================
+// 🗄️ TAB 1: BASE DE DATOS (CON BUSCADOR INTELIGENTE)
+// =================================================================================================
 const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, showNotify, COLLECTION_PATH }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchSaved, setSearchSaved] = useState(''); // NUEVO: Estado para buscar registros guardados
     const [selectedModels, setSelectedModels] = useState([]);
     const [modelConfig, setModelConfig] = useState({});
     const [rawIds, setRawIds] = useState('');
@@ -224,6 +228,7 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
     const filteredModels = availableModels.filter(m => m.toLowerCase().includes(searchTerm.toLowerCase()));
+    
     const groupedInventory = useMemo(() => {
         const groups = {};
         inventoryList.forEach(item => {
@@ -233,6 +238,13 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
         });
         return Object.values(groups).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     }, [inventoryList]);
+
+    // NUEVO: Filtro de registros guardados
+    const filteredSavedRecords = useMemo(() => {
+        return groupedInventory.filter(g => 
+            (g.batchName || '').toLowerCase().includes(searchSaved.toLowerCase())
+        );
+    }, [groupedInventory, searchSaved]);
 
     const handleSave = async () => {
         if (!rawIds.trim() || selectedModels.length === 0) return showNotify('error', 'Faltan datos');
@@ -285,17 +297,32 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
                 <textarea className="w-full h-32 p-3 border border-slate-600 rounded mt-4 text-xs font-mono bg-slate-900/90 text-indigo-200 outline-none focus:border-indigo-500 shadow-inner" placeholder="Pega los códigos aquí..." value={rawIds} onChange={e => setRawIds(e.target.value)}></textarea>
                 <button onClick={handleSave} disabled={saving} className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-[1.02] disabled:opacity-50">{saving ? 'Guardando...' : 'GUARDAR REGISTRO'}</button>
              </div>
-             <div className="lg:col-span-7 bg-slate-800/80 rounded-2xl shadow-lg border border-slate-600 p-6 h-[600px] overflow-y-auto custom-scrollbar backdrop-blur-sm">
-                <h3 className="font-bold mb-4 text-white uppercase tracking-wider">Registros Guardados</h3>
-                {groupedInventory.map(g => (
-                    <div key={g.batchId} className="border-b border-slate-700 py-3 flex justify-between items-start hover:bg-slate-700/30 transition px-2 rounded">
-                        <div><div className="font-bold text-indigo-300">{g.batchName || 'Sin Nombre'}</div><div className="text-xs text-slate-400">{g.items.length} items - {new Date(g.createdAt?.seconds * 1000).toLocaleDateString()}</div></div>
-                        <div className="flex gap-2">
-                            <button onClick={() => { setEditingBatchId(g.batchId); setBatchName(g.batchName); setRawIds(g.items.join('\n')); const mods = Object.keys(g.percentages).filter(k=>k!==EMPRESA); setSelectedModels(mods); const c={}; mods.forEach(m=>c[m]=g.percentages[m]); setModelConfig(c); }} className="text-indigo-400 text-xs font-bold bg-indigo-900/30 px-3 py-1 rounded hover:bg-indigo-900/50 transition border border-indigo-800">Editar</button>
-                            <button onClick={() => handleDeleteBatch(g.batchId)} className={`text-xs font-bold px-3 py-1 rounded transition ${confirmDeleteId === g.batchId ? 'bg-red-600 text-white animate-pulse' : 'text-red-400 hover:bg-red-900/30 border border-red-900/50'}`}>{confirmDeleteId === g.batchId ? '¿CONFIRMAR?' : 'Eliminar'}</button>
+             
+             <div className="lg:col-span-7 bg-slate-800/80 rounded-2xl shadow-lg border border-slate-600 p-6 h-[600px] overflow-hidden flex flex-col backdrop-blur-sm">
+                <h3 className="font-bold mb-4 text-white uppercase tracking-wider">Registros Guardados ({filteredSavedRecords.length})</h3>
+                {/* --- NUEVO BUSCADOR DE REGISTROS --- */}
+                <div className="mb-4">
+                    <input 
+                        type="text" 
+                        placeholder="🔍 Buscar registro guardado (ej: Pack Octubre)..." 
+                        className="w-full p-3 border border-slate-600 rounded-xl bg-slate-900/80 text-white text-sm outline-none focus:border-indigo-500 shadow-inner"
+                        value={searchSaved}
+                        onChange={e => setSearchSaved(e.target.value)}
+                    />
+                </div>
+                
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    {filteredSavedRecords.length === 0 ? <div className="text-center text-slate-500 mt-10">No se encontraron registros.</div> : 
+                    filteredSavedRecords.map(g => (
+                        <div key={g.batchId} className="border-b border-slate-700 py-3 flex justify-between items-start hover:bg-slate-700/30 transition px-2 rounded">
+                            <div><div className="font-bold text-indigo-300">{g.batchName || 'Sin Nombre'}</div><div className="text-xs text-slate-400">{g.items.length} items - {new Date(g.createdAt?.seconds * 1000).toLocaleDateString()}</div></div>
+                            <div className="flex gap-2">
+                                <button onClick={() => { setEditingBatchId(g.batchId); setBatchName(g.batchName); setRawIds(g.items.join('\n')); const mods = Object.keys(g.percentages).filter(k=>k!==EMPRESA); setSelectedModels(mods); const c={}; mods.forEach(m=>c[m]=g.percentages[m]); setModelConfig(c); }} className="text-indigo-400 text-xs font-bold bg-indigo-900/30 px-3 py-1 rounded hover:bg-indigo-900/50 transition border border-indigo-800">Editar</button>
+                                <button onClick={() => handleDeleteBatch(g.batchId)} className={`text-xs font-bold px-3 py-1 rounded transition ${confirmDeleteId === g.batchId ? 'bg-red-600 text-white animate-pulse' : 'text-red-400 hover:bg-red-900/30 border border-red-900/50'}`}>{confirmDeleteId === g.batchId ? '¿CONFIRMAR?' : 'Eliminar'}</button>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
              </div>
         </div>
     );
@@ -344,7 +371,6 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                 const earnings = {};
                 const percentages = inventory[item.code];
                 Object.entries(percentages).forEach(([owner, pct]) => earnings[owner] = (item.value * pct) / 100);
-                // --- CORRECCIÓN CLAVE AQUÍ (v5.16) ---
                 const newDocRef = doc(collection(db, `${COLLECTION_PATH}/earnings_records`));
                 batch.set(newDocRef, { itemId: item.code, usdValue: item.value, ganancias: earnings, rawLine: item.original, period: currentPeriod, createdAt: serverTimestamp() });
             });
@@ -359,7 +385,6 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
 
     const handleClearPeriod = async () => {
         if (transactions.length === 0) return;
-        
         if (confirmClear) {
             try {
                 const batch = writeBatch(db);
@@ -388,7 +413,7 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                     </div>
                     <textarea 
                         className="w-full h-64 p-4 border border-slate-600 rounded-xl text-xs font-mono outline-none resize-none bg-slate-900/90 text-green-400 shadow-inner focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.3)] transition" 
-                        placeholder="SYSTEM READY... INGRESE DATOS DEL PDF..." 
+                        placeholder={`>> SYSTEM READY...\n>> INGRESE DATOS DEL PDF...\n\n6879166 — $5.39\n...`} 
                         value={rawInput} onChange={e => setRawInput(e.target.value)}
                     ></textarea>
                     <button onClick={handleProcess} disabled={processing || previewData.length === 0} className="w-full mt-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-black py-4 rounded-xl shadow-lg transition transform hover:scale-[1.02] disabled:opacity-50 tracking-widest">
@@ -535,7 +560,7 @@ const TabAnalytics = ({ transactions, currentPeriod, availableModels, trm }) => 
                 <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center">
                     <h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3>
                     <div className="text-3xl font-black text-white uppercase">{currentPeriod}</div>
-                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.16 SYSTEM</div>
+                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.17 SYSTEM</div>
                 </div>
             </div>
             
