@@ -13,6 +13,8 @@ const firebaseConfig = {
   appId: "1:415297430138:web:aa22529f2456b2746dd1c3"
 };
 
+// --- CONSTANTES GLOBALES ---
+const LOGO_URL = "https://ugc.production.linktr.ee/2760c98b-94c6-4da8-bf4a-1744413717c3_LogoSolo.png?io=true&size=avatar-v3_0";
 const INITIAL_MODELOS = [
     'KATHY', 'TIMMY', 'LEO', 'JACOB', 'LEYLA', 'LAURY', 'EMMA', 'HANNAH',
     'SPEEDY', 'JOSE', 'ANDREW', 'CARLOS', 'DUKE', 'JEN', 'JOSE LUIS', 
@@ -68,7 +70,9 @@ const LoginScreen = ({ auth }) => {
         <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
              <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-purple-600"></div>
-                <div className="text-center mb-8">
+                <div className="text-center mb-8 flex flex-col items-center">
+                    {/* LOGO EN LOGIN TAMBIÉN */}
+                    <img src={LOGO_URL} alt="DS Logo" className="w-20 h-20 rounded-full shadow-lg mb-4 border-2 border-cyan-500/30" />
                     <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.20</span></h1>
                     <p className="text-slate-400 text-xs font-mono">SISTEMA DE ACCESO RESTRINGIDO</p>
                 </div>
@@ -174,11 +178,15 @@ const App = () => {
                 .grid-bg { background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px); background-size: 20px 20px; }
             `}</style>
 
-            {/* HEADER */}
-            <div className={`p-4 shadow-lg no-print sticky top-0 z-50 transition-colors duration-500 ${activeTab === 'analytics' || activeTab === 'billing' ? 'bg-black/90 backdrop-blur-md border-b border-cyan-900' : 'bg-slate-900 text-white'}`}>
+            {/* HEADER CON LOGO */}
+            <div className={`p-3 shadow-lg no-print sticky top-0 z-50 transition-colors duration-500 ${activeTab === 'analytics' || activeTab === 'billing' ? 'bg-black/90 backdrop-blur-md border-b border-cyan-900' : 'bg-slate-900 text-white'}`}>
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-4">
-                        <h1 className={`text-xl font-black tracking-tight ${activeTab === 'analytics' || activeTab === 'billing' ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text' : ''}`}>DS GESTIÓN <span className="text-orange-400">v5.20</span></h1>
+                        {/* --- ZONA DEL LOGO Y TÍTULO --- */}
+                        <div className="flex items-center gap-3">
+                            <img src={LOGO_URL} alt="DS Logo" className="w-10 h-10 rounded-full object-cover shadow-sm border border-white/10" />
+                            <h1 className={`text-xl font-black tracking-tight ${activeTab === 'analytics' || activeTab === 'billing' ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text' : ''}`}>DS GESTIÓN <span className="text-orange-400">v5.20</span></h1>
+                        </div>
                         <button onClick={() => signOut(auth)} className="bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white text-[10px] px-2 py-1 rounded border border-red-500/50 transition uppercase font-bold">SALIR</button>
                     </div>
                     <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
@@ -543,7 +551,13 @@ const TabReports = ({ transactions, trm, currentPeriod, manyvidsCop }) => {
     return (
         <div className="bg-white p-8 max-w-4xl mx-auto shadow-2xl print-content border border-slate-200 text-slate-800">
              <div className="mb-8 border-b-4 border-slate-800 pb-4 flex justify-between items-end print-header">
-                <div><h1 className="text-4xl font-black text-slate-900 uppercase print:text-black">DS FILMATION</h1><p className="text-sm font-bold mt-1 text-slate-500 print:text-black">REPORTE MENSUAL</p></div>
+                
+                {/* --- LOGO EN EL REPORTE PDF TAMBIÉN --- */}
+                <div className="flex items-center gap-4">
+                    <img src={LOGO_URL} alt="DS Logo" className="w-16 h-16 rounded-full object-cover border-2 border-slate-900 print:border-black" />
+                    <div><h1 className="text-4xl font-black text-slate-900 uppercase print:text-black">DS FILMATION</h1><p className="text-sm font-bold mt-1 text-slate-500 print:text-black">REPORTE MENSUAL</p></div>
+                </div>
+                
                 <div className="text-right"><div className="text-xs font-bold text-slate-400 print:text-black">Periodo</div><div className="text-2xl font-mono font-bold text-slate-900 uppercase print:text-black">{currentPeriod}</div></div>
             </div>
             <table className="w-full text-sm mb-8">
