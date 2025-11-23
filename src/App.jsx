@@ -69,7 +69,7 @@ const LoginScreen = ({ auth }) => {
              <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-purple-600"></div>
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.13</span></h1>
+                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.15</span></h1>
                     <p className="text-slate-400 text-xs font-mono">SISTEMA DE ACCESO RESTRINGIDO</p>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -150,15 +150,16 @@ const App = () => {
     if (!isAuthReady) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-cyan-500 font-mono animate-pulse">CARGANDO SISTEMA...</div>;
     if (!user) return <LoginScreen auth={auth} />;
 
+    // --- MODO OSCURO GLOBAL ACTIVADO SIEMPRE ---
     return (
-        <div className={`min-h-screen font-sans flex flex-col ${activeTab === 'analytics' || activeTab === 'billing' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-800'}`}>
+        <div className="min-h-screen font-sans flex flex-col bg-slate-900 text-white">
             <style>{`
                 @media print {
                     @page { margin: 0; size: auto; }
                     body, html { margin: 0; padding: 0; background-color: white !important; }
                     body * { visibility: hidden; }
                     .print-content, .print-content * { visibility: visible; }
-                    .print-content { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
+                    .print-content { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; color: black !important; }
                     .no-print { display: none !important; }
                 }
                 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -171,10 +172,10 @@ const App = () => {
             `}</style>
 
             {/* HEADER */}
-            <div className={`p-4 shadow-lg no-print sticky top-0 z-50 transition-colors duration-500 ${activeTab === 'analytics' || activeTab === 'billing' ? 'bg-black/90 backdrop-blur-md border-b border-cyan-900' : 'bg-slate-900 text-white'}`}>
+            <div className="p-4 shadow-lg no-print sticky top-0 z-50 transition-colors duration-500 bg-black/90 backdrop-blur-md border-b border-cyan-900">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-4">
-                        <h1 className={`text-xl font-black tracking-tight ${activeTab === 'analytics' || activeTab === 'billing' ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text' : ''}`}>DS GESTIÓN <span className="text-orange-400">v5.13</span></h1>
+                        <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text">DS GESTIÓN <span className="text-orange-400">v5.15</span></h1>
                         <button onClick={() => signOut(auth)} className="bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white text-[10px] px-2 py-1 rounded border border-red-500/50 transition uppercase font-bold">SALIR</button>
                     </div>
                     <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
@@ -193,7 +194,7 @@ const App = () => {
             </div>
 
             {/* CONTENIDO */}
-            <div className={`flex-1 w-full p-4 ${activeTab === 'analytics' || activeTab === 'billing' ? 'max-w-full px-4 md:px-8 grid-bg' : 'max-w-7xl mx-auto'}`}>
+            <div className="flex-1 w-full p-4 max-w-full px-4 md:px-8 grid-bg">
                 {notification && <div className={`fixed top-20 right-4 z-50 px-6 py-4 rounded-xl shadow-2xl text-white font-bold animate-bounce ${notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'} no-print`}>{notification.msg}</div>}
                 
                 {activeTab === 'database' && <TabDatabase db={db} inventoryList={inventoryList} availableModels={availableModels} setAvailableModels={setAvailableModels} showNotify={showNotify} COLLECTION_PATH={COLLECTION_PATH} />}
@@ -211,6 +212,9 @@ const TabButton = ({ id, label, icon, active, set, color }) => (
     </button>
 );
 
+// =================================================================================================
+// 🗄️ TAB 1: BASE DE DATOS (FUTURISTA)
+// =================================================================================================
 const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, showNotify, COLLECTION_PATH }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedModels, setSelectedModels] = useState([]);
@@ -265,34 +269,34 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 no-print">
-             <div className="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-fit">
-                <h2 className="text-lg font-black text-indigo-900 mb-4">1. Gestión de Modelos</h2>
-                <input type="text" placeholder="Nombre del Registro (Ej: Pack Octubre)" className="w-full mb-3 p-2 border border-slate-300 rounded bg-white text-slate-900 font-bold" value={batchName} onChange={e => setBatchName(e.target.value)} />
+             <div className="lg:col-span-5 bg-slate-800/80 rounded-2xl shadow-lg border border-indigo-500/30 p-6 h-fit neon-box backdrop-blur-sm">
+                <h2 className="text-lg font-black text-indigo-400 mb-4 uppercase tracking-wider">1. Gestión de Modelos</h2>
+                <input type="text" placeholder="Nombre del Registro (Ej: Pack Octubre)" className="w-full mb-3 p-3 border border-slate-600 rounded bg-slate-900/50 text-white font-bold outline-none focus:border-indigo-500" value={batchName} onChange={e => setBatchName(e.target.value)} />
                 <div className="flex gap-2 mb-2">
-                    <input type="text" placeholder="Buscar modelo..." className="flex-1 p-2 border rounded bg-slate-50 text-sm" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-                    <button onClick={() => setShowNewModelInput(!showNewModelInput)} className="bg-slate-200 px-3 rounded">+</button>
+                    <input type="text" placeholder="Buscar modelo..." className="flex-1 p-2 border border-slate-600 rounded bg-slate-900/50 text-sm text-white outline-none" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                    <button onClick={() => setShowNewModelInput(!showNewModelInput)} className="bg-slate-700 text-white px-3 rounded hover:bg-slate-600">+</button>
                 </div>
-                {showNewModelInput && (<div className="flex gap-2 mb-3"><input type="text" className="flex-1 border p-1 rounded" value={newModelName} onChange={e => setNewModelName(e.target.value)} /><button onClick={() => { if(newModelName) { setAvailableModels(p => [...p, newModelName.toUpperCase()].sort()); setNewModelName(''); }}} className="bg-indigo-600 text-white px-3 rounded">OK</button></div>)}
+                {showNewModelInput && (<div className="flex gap-2 mb-3"><input type="text" className="flex-1 border border-slate-600 bg-slate-900/50 text-white p-1 rounded" value={newModelName} onChange={e => setNewModelName(e.target.value)} /><button onClick={() => { if(newModelName) { setAvailableModels(p => [...p, newModelName.toUpperCase()].sort()); setNewModelName(''); }}} className="bg-indigo-600 text-white px-3 rounded">OK</button></div>)}
                 <div className="flex flex-wrap gap-1 mb-4 max-h-32 overflow-y-auto">
-                    {filteredModels.map(m => (<button key={m} onClick={() => { if (selectedModels.includes(m)) { setSelectedModels(s => s.filter(x => x !== m)); const c = {...modelConfig}; delete c[m]; setModelConfig(c); } else { setSelectedModels(s => [...s, m]); } }} className={`text-[10px] px-2 py-1 rounded border ${selectedModels.includes(m) ? 'bg-indigo-600 text-white' : 'bg-white'}`}>{m}</button>))}
+                    {filteredModels.map(m => (<button key={m} onClick={() => { if (selectedModels.includes(m)) { setSelectedModels(s => s.filter(x => x !== m)); const c = {...modelConfig}; delete c[m]; setModelConfig(c); } else { setSelectedModels(s => [...s, m]); } }} className={`text-[10px] px-2 py-1 rounded border transition ${selectedModels.includes(m) ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600'}`}>{m}</button>))}
                 </div>
                 {selectedModels.map(m => (
                     <div key={m} className="flex justify-between items-center mb-1 text-xs">
-                        <span className="font-bold">{m}</span>
-                        <input type="number" className="w-16 bg-white text-indigo-900 border border-indigo-200 rounded text-right p-1 font-bold outline-none focus:ring-2 focus:ring-indigo-500" value={modelConfig[m]||''} onChange={e => setModelConfig({...modelConfig, [m]: parseFloat(e.target.value)})} placeholder="%" />
+                        <span className="font-bold text-indigo-300">{m}</span>
+                        <input type="number" className="w-16 bg-white text-indigo-900 border border-indigo-500 rounded text-right p-1 font-bold outline-none focus:ring-2 focus:ring-indigo-400" value={modelConfig[m]||''} onChange={e => setModelConfig({...modelConfig, [m]: parseFloat(e.target.value)})} placeholder="%" />
                     </div>
                 ))}
-                <textarea className="w-full h-32 p-3 border rounded mt-4 text-xs font-mono bg-white text-slate-900" placeholder="Pega los códigos aquí..." value={rawIds} onChange={e => setRawIds(e.target.value)}></textarea>
-                <button onClick={handleSave} disabled={saving} className="w-full mt-4 bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700">{saving ? 'Guardando...' : 'GUARDAR REGISTRO'}</button>
+                <textarea className="w-full h-32 p-3 border border-slate-600 rounded mt-4 text-xs font-mono bg-slate-900/90 text-indigo-200 outline-none focus:border-indigo-500 shadow-inner" placeholder="Pega los códigos aquí..." value={rawIds} onChange={e => setRawIds(e.target.value)}></textarea>
+                <button onClick={handleSave} disabled={saving} className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-[1.02] disabled:opacity-50">{saving ? 'Guardando...' : 'GUARDAR REGISTRO'}</button>
              </div>
-             <div className="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-[600px] overflow-y-auto custom-scrollbar">
-                <h3 className="font-bold mb-4">Registros Guardados</h3>
+             <div className="lg:col-span-7 bg-slate-800/80 rounded-2xl shadow-lg border border-slate-600 p-6 h-[600px] overflow-y-auto custom-scrollbar backdrop-blur-sm">
+                <h3 className="font-bold mb-4 text-white uppercase tracking-wider">Registros Guardados</h3>
                 {groupedInventory.map(g => (
-                    <div key={g.batchId} className="border-b py-3 flex justify-between items-start">
-                        <div><div className="font-bold text-slate-700">{g.batchName || 'Sin Nombre'}</div><div className="text-xs text-slate-400">{g.items.length} items - {new Date(g.createdAt?.seconds * 1000).toLocaleDateString()}</div></div>
+                    <div key={g.batchId} className="border-b border-slate-700 py-3 flex justify-between items-start hover:bg-slate-700/30 transition px-2 rounded">
+                        <div><div className="font-bold text-indigo-300">{g.batchName || 'Sin Nombre'}</div><div className="text-xs text-slate-400">{g.items.length} items - {new Date(g.createdAt?.seconds * 1000).toLocaleDateString()}</div></div>
                         <div className="flex gap-2">
-                            <button onClick={() => { setEditingBatchId(g.batchId); setBatchName(g.batchName); setRawIds(g.items.join('\n')); const mods = Object.keys(g.percentages).filter(k=>k!==EMPRESA); setSelectedModels(mods); const c={}; mods.forEach(m=>c[m]=g.percentages[m]); setModelConfig(c); }} className="text-indigo-600 text-xs font-bold bg-indigo-50 px-3 py-1 rounded hover:bg-indigo-100 transition">Editar</button>
-                            <button onClick={() => handleDeleteBatch(g.batchId)} className={`text-xs font-bold px-3 py-1 rounded transition ${confirmDeleteId === g.batchId ? 'bg-red-600 text-white animate-pulse' : 'text-red-400 hover:bg-red-50'}`}>{confirmDeleteId === g.batchId ? '¿CONFIRMAR?' : 'Eliminar'}</button>
+                            <button onClick={() => { setEditingBatchId(g.batchId); setBatchName(g.batchName); setRawIds(g.items.join('\n')); const mods = Object.keys(g.percentages).filter(k=>k!==EMPRESA); setSelectedModels(mods); const c={}; mods.forEach(m=>c[m]=g.percentages[m]); setModelConfig(c); }} className="text-indigo-400 text-xs font-bold bg-indigo-900/30 px-3 py-1 rounded hover:bg-indigo-900/50 transition border border-indigo-800">Editar</button>
+                            <button onClick={() => handleDeleteBatch(g.batchId)} className={`text-xs font-bold px-3 py-1 rounded transition ${confirmDeleteId === g.batchId ? 'bg-red-600 text-white animate-pulse' : 'text-red-400 hover:bg-red-900/30 border border-red-900/50'}`}>{confirmDeleteId === g.batchId ? '¿CONFIRMAR?' : 'Eliminar'}</button>
                         </div>
                     </div>
                 ))}
@@ -302,13 +306,13 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
 };
 
 // =================================================================================================
-// 💵 TAB 2: FACTURACIÓN FUTURISTA
+// 💵 TAB 2: FACTURACIÓN FUTURISTA (CON DELETE INLINE)
 // =================================================================================================
 const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, showNotify, COLLECTION_PATH, currentPeriod }) => {
     const [rawInput, setRawInput] = useState('');
     const [processing, setProcessing] = useState(false);
     const [previewData, setPreviewData] = useState([]);
-    const [deletingAll, setDeletingAll] = useState(false);
+    const [confirmClear, setConfirmClear] = useState(false); // NUEVO ESTADO PARA CONFIRMACIÓN INLINE
 
     const uniqueBatches = useMemo(() => {
         const map = new Map();
@@ -358,17 +362,25 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
 
     const handleDeleteTransaction = async (id) => { if(!window.confirm('¿Borrar?')) return; try { await deleteDoc(doc(db, `${COLLECTION_PATH}/earnings_records`, id)); showNotify('success', 'Borrado'); } catch (e) { showNotify('error', 'Error'); } };
 
+    // --- NUEVA LÓGICA: BORRADO INLINE SIN VENTANA EMERGENTE ---
     const handleClearPeriod = async () => {
         if (transactions.length === 0) return;
-        if (!window.confirm(`⚠️ PELIGRO ⚠️\n\n¿Estás seguro de que quieres ELIMINAR TODAS las facturas de ${currentPeriod}?\n\nEsta acción NO se puede deshacer.`)) return;
-        setDeletingAll(true);
-        try {
-            const batch = writeBatch(db);
-            transactions.forEach(t => { batch.delete(doc(db, `${COLLECTION_PATH}/earnings_records`, t.id)); });
-            await batch.commit();
-            showNotify('success', `Historial de ${currentPeriod} eliminado completamente.`);
-        } catch (e) { console.error(e); showNotify('error', 'Error al intentar borrar todo.'); }
-        setDeletingAll(false);
+        
+        if (confirmClear) {
+            // SEGUNDO CLIC: BORRAR DE VERDAD
+            try {
+                const batch = writeBatch(db);
+                transactions.forEach(t => { batch.delete(doc(db, `${COLLECTION_PATH}/earnings_records`, t.id)); });
+                await batch.commit();
+                showNotify('success', `Historial de ${currentPeriod} eliminado completamente.`);
+                setConfirmClear(false);
+            } catch (e) { console.error(e); showNotify('error', 'Error al intentar borrar todo.'); }
+        } else {
+            // PRIMER CLIC: PEDIR CONFIRMACIÓN
+            setConfirmClear(true);
+            // Si no confirma en 3 segundos, se cancela
+            setTimeout(() => setConfirmClear(false), 3000);
+        }
     };
 
     return (
@@ -427,7 +439,7 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2">
-                        {transactions.length === 0 ? <p className="text-center text-slate-500 py-10 font-mono"> SIN REGISTROS </p> : 
+                        {transactions.length === 0 ? <p className="text-center text-slate-500 py-10 font-mono">--- SIN REGISTROS ---</p> : 
                         transactions.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).map(t => (
                             <div key={t.id} className="p-2 border border-slate-700/50 rounded bg-slate-900/50 flex justify-between items-center text-xs hover:border-green-500/50 transition group">
                                 <div><span className="font-mono font-bold text-green-300 mr-2">{t.itemId}</span><span className="text-slate-500">{new Date(t.createdAt?.seconds*1000).toLocaleTimeString()}</span></div>
@@ -438,8 +450,12 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
 
                     {transactions.length > 0 && (
                         <div className="mt-4 pt-4 border-t border-slate-700">
-                            <button onClick={handleClearPeriod} disabled={deletingAll} className="w-full bg-red-900/30 hover:bg-red-900/80 border border-red-800 text-red-400 hover:text-white font-bold py-2 rounded-lg transition flex justify-center items-center gap-2 uppercase text-xs tracking-widest">
-                                {deletingAll ? 'ELIMINANDO...' : '💀 BORRAR TODO EL HISTORIAL DE ESTE MES'}
+                            {/* --- BOTÓN DE BORRADO INTELIGENTE SIN VENTANA EMERGENTE --- */}
+                            <button 
+                                onClick={handleClearPeriod} 
+                                className={`w-full border font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 uppercase text-xs tracking-widest ${confirmClear ? 'bg-red-600 border-red-500 text-white animate-pulse shadow-[0_0_20px_rgba(220,38,38,0.6)]' : 'bg-red-900/20 border-red-900/50 text-red-400 hover:bg-red-900/40'}`}
+                            >
+                                {confirmClear ? '⚠️ ¿CONFIRMAR BORRADO TOTAL? ⚠️' : '💀 BORRAR TODO EL HISTORIAL'}
                             </button>
                         </div>
                     )}
@@ -459,29 +475,29 @@ const TabReports = ({ transactions, trm, currentPeriod }) => {
     }, [transactions, trm]);
 
     return (
-        <div className="bg-white p-8 max-w-4xl mx-auto shadow-2xl print-content border border-slate-100">
-             <div className="mb-8 border-b-4 border-slate-800 pb-4 flex justify-between items-end print-header">
-                <div><h1 className="text-4xl font-black text-slate-900 uppercase">DS FILMATION</h1><p className="text-sm font-bold mt-1">REPORTE MENSUAL</p></div>
-                <div className="text-right"><div className="text-xs font-bold text-slate-400">Periodo</div><div className="text-2xl font-mono font-bold text-slate-800 uppercase">{currentPeriod}</div></div>
+        <div className="bg-slate-800 p-8 max-w-4xl mx-auto shadow-2xl print-content border border-slate-600 neon-box">
+             <div className="mb-8 border-b-4 border-slate-600 pb-4 flex justify-between items-end print-header">
+                <div><h1 className="text-4xl font-black text-white uppercase print:text-black">DS FILMATION</h1><p className="text-sm font-bold mt-1 text-slate-400 print:text-black">REPORTE MENSUAL</p></div>
+                <div className="text-right"><div className="text-xs font-bold text-slate-400 print:text-black">Periodo</div><div className="text-2xl font-mono font-bold text-white uppercase print:text-black">{currentPeriod}</div></div>
             </div>
             <table className="w-full text-sm mb-8">
-                <thead className="bg-slate-800 text-white">
+                <thead className="bg-slate-900 text-white print:bg-slate-200 print:text-black">
                     <tr>
                         <th className="p-3 text-left">Modelo</th>
                         <th className="p-3 text-right">USD</th>
                         <th className="p-3 text-right">COP ({trm})</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="text-slate-300 print:text-black">
                     {report.rows.map(r => (
-                        <tr key={r.name} className="border-b even:bg-slate-50">
-                            <td className="p-3 font-bold">{r.name}</td>
+                        <tr key={r.name} className="border-b border-slate-700 even:bg-slate-700/30 print:border-slate-300 print:even:bg-slate-100">
+                            <td className="p-3 font-bold text-white print:text-black">{r.name}</td>
                             <td className="p-3 text-right font-mono">${r.usd.toFixed(2)}</td>
                             <td className="p-3 text-right font-bold">${r.cop.toLocaleString('es-CO')}</td>
                         </tr>
                     ))}
                 </tbody>
-                <tfoot className="bg-slate-100 font-bold">
+                <tfoot className="bg-slate-900 font-bold text-white print:bg-slate-200 print:text-black">
                     <tr>
                         <td className="p-3">TOTAL</td>
                         <td className="p-3 text-right">${report.totalUSD.toFixed(2)}</td>
@@ -489,7 +505,7 @@ const TabReports = ({ transactions, trm, currentPeriod }) => {
                     </tr>
                 </tfoot>
             </table>
-            <div className="text-center no-print"><button onClick={() => window.print()} className="bg-slate-900 text-white px-6 py-2 rounded-lg font-bold">IMPRIMIR REPORTE</button></div>
+            <div className="text-center no-print"><button onClick={() => window.print()} className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:scale-105 transition">IMPRIMIR REPORTE OFICIAL</button></div>
         </div>
     );
 };
@@ -529,7 +545,7 @@ const TabAnalytics = ({ transactions, currentPeriod, availableModels, trm }) => 
                 <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center">
                     <h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3>
                     <div className="text-3xl font-black text-white uppercase">{currentPeriod}</div>
-                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.13 SYSTEM</div>
+                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.15 SYSTEM</div>
                 </div>
             </div>
             
