@@ -69,7 +69,7 @@ const LoginScreen = ({ auth }) => {
              <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-purple-600"></div>
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.17</span></h1>
+                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.18</span></h1>
                     <p className="text-slate-400 text-xs font-mono">SISTEMA DE ACCESO RESTRINGIDO</p>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -174,7 +174,7 @@ const App = () => {
             <div className="p-4 shadow-lg no-print sticky top-0 z-50 transition-colors duration-500 bg-black/90 backdrop-blur-md border-b border-cyan-900">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text">DS GESTIÓN <span className="text-orange-400">v5.17</span></h1>
+                        <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text">DS GESTIÓN <span className="text-orange-400">v5.18</span></h1>
                         <button onClick={() => signOut(auth)} className="bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white text-[10px] px-2 py-1 rounded border border-red-500/50 transition uppercase font-bold">SALIR</button>
                     </div>
                     <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
@@ -211,12 +211,9 @@ const TabButton = ({ id, label, icon, active, set, color }) => (
     </button>
 );
 
-// =================================================================================================
-// 🗄️ TAB 1: BASE DE DATOS (CON BUSCADOR INTELIGENTE)
-// =================================================================================================
 const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, showNotify, COLLECTION_PATH }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [searchSaved, setSearchSaved] = useState(''); // NUEVO: Estado para buscar registros guardados
+    const [searchSaved, setSearchSaved] = useState(''); 
     const [selectedModels, setSelectedModels] = useState([]);
     const [modelConfig, setModelConfig] = useState({});
     const [rawIds, setRawIds] = useState('');
@@ -228,7 +225,6 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
     const filteredModels = availableModels.filter(m => m.toLowerCase().includes(searchTerm.toLowerCase()));
-    
     const groupedInventory = useMemo(() => {
         const groups = {};
         inventoryList.forEach(item => {
@@ -239,11 +235,8 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
         return Object.values(groups).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     }, [inventoryList]);
 
-    // NUEVO: Filtro de registros guardados
     const filteredSavedRecords = useMemo(() => {
-        return groupedInventory.filter(g => 
-            (g.batchName || '').toLowerCase().includes(searchSaved.toLowerCase())
-        );
+        return groupedInventory.filter(g => (g.batchName || '').toLowerCase().includes(searchSaved.toLowerCase()));
     }, [groupedInventory, searchSaved]);
 
     const handleSave = async () => {
@@ -300,17 +293,9 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
              
              <div className="lg:col-span-7 bg-slate-800/80 rounded-2xl shadow-lg border border-slate-600 p-6 h-[600px] overflow-hidden flex flex-col backdrop-blur-sm">
                 <h3 className="font-bold mb-4 text-white uppercase tracking-wider">Registros Guardados ({filteredSavedRecords.length})</h3>
-                {/* --- NUEVO BUSCADOR DE REGISTROS --- */}
                 <div className="mb-4">
-                    <input 
-                        type="text" 
-                        placeholder="🔍 Buscar registro guardado (ej: Pack Octubre)..." 
-                        className="w-full p-3 border border-slate-600 rounded-xl bg-slate-900/80 text-white text-sm outline-none focus:border-indigo-500 shadow-inner"
-                        value={searchSaved}
-                        onChange={e => setSearchSaved(e.target.value)}
-                    />
+                    <input type="text" placeholder="🔍 Buscar registro guardado (ej: Pack Octubre)..." className="w-full p-3 border border-slate-600 rounded-xl bg-slate-900/80 text-white text-sm outline-none focus:border-indigo-500 shadow-inner" value={searchSaved} onChange={e => setSearchSaved(e.target.value)} />
                 </div>
-                
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                     {filteredSavedRecords.length === 0 ? <div className="text-center text-slate-500 mt-10">No se encontraron registros.</div> : 
                     filteredSavedRecords.map(g => (
@@ -324,6 +309,55 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
                     ))}
                 </div>
              </div>
+        </div>
+    );
+};
+
+// =================================================================================================
+// 💵 TAB 2: FACTURACIÓN FUTURISTA (CON BUSCADOR INTELIGENTE)
+// =================================================================================================
+
+// --- NUEVO COMPONENTE: BUSCADOR DE LOTES EN FILA ---
+const BatchSearch = ({ batches, onAssign }) => {
+    const [text, setText] = useState('');
+    const [show, setShow] = useState(false);
+
+    const filtered = useMemo(() => {
+        if (!text) return batches;
+        return batches.filter(b => b.name.toLowerCase().includes(text.toLowerCase()));
+    }, [batches, text]);
+
+    return (
+        <div className="relative w-full">
+            <input 
+                type="text" 
+                placeholder="🔍 Escribe para buscar..." 
+                className="w-full bg-slate-900/80 border border-slate-600 rounded text-[10px] p-2 text-white outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition"
+                value={text}
+                onChange={e => setText(e.target.value)}
+                onFocus={() => setShow(true)}
+                onBlur={() => setTimeout(() => setShow(false), 200)} // Delay para permitir click
+            />
+            {show && (
+                <div className="absolute left-0 top-full mt-1 w-full max-h-40 overflow-y-auto bg-slate-800 border border-slate-600 rounded shadow-2xl z-50 custom-scrollbar">
+                    {filtered.length === 0 ? (
+                        <div className="p-2 text-[10px] text-slate-500">Sin resultados</div>
+                    ) : (
+                        filtered.map(b => (
+                            <div 
+                                key={b.id} 
+                                className="p-2 text-[10px] text-slate-300 hover:bg-green-900/30 hover:text-green-400 cursor-pointer border-b border-slate-700 last:border-none"
+                                onClick={() => {
+                                    setText(b.name);
+                                    onAssign(b.id);
+                                }}
+                            >
+                                {b.name}
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
         </div>
     );
 };
@@ -413,7 +447,7 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                     </div>
                     <textarea 
                         className="w-full h-64 p-4 border border-slate-600 rounded-xl text-xs font-mono outline-none resize-none bg-slate-900/90 text-green-400 shadow-inner focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.3)] transition" 
-                        placeholder={`>> SYSTEM READY...\n>> INGRESE DATOS DEL PDF...\n\n6879166 — $5.39\n...`} 
+                        placeholder="SYSTEM READY... INGRESE DATOS DEL PDF..." 
                         value={rawInput} onChange={e => setRawInput(e.target.value)}
                     ></textarea>
                     <button onClick={handleProcess} disabled={processing || previewData.length === 0} className="w-full mt-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-black py-4 rounded-xl shadow-lg transition transform hover:scale-[1.02] disabled:opacity-50 tracking-widest">
@@ -428,13 +462,17 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                         <h3 className="font-bold text-green-400 mb-2 text-sm uppercase tracking-wider">Vista Previa de Datos</h3>
                         <div className="max-h-60 overflow-y-auto custom-scrollbar">
                             <table className="w-full text-xs text-slate-300">
-                                <thead className="bg-slate-900 text-green-500"><tr><th className="p-2 text-left">Código</th><th className="p-2">Valor</th><th className="p-2">Estado</th></tr></thead>
+                                <thead className="bg-slate-900 text-green-500"><tr><th className="p-2 text-left">Código</th><th className="p-2">Valor</th><th className="p-2 w-48">Estado / Asignar</th></tr></thead>
                                 <tbody>
                                     {previewData.map((row, i) => (
                                         <tr key={i} className={`border-b border-slate-700 ${row.found ? 'bg-transparent' : 'bg-red-900/20'}`}>
                                             <td className="p-2 font-mono text-white">{row.code}</td>
                                             <td className="p-2 font-bold text-green-300">${row.value}</td>
-                                            <td className="p-2">{row.found ? <span className="text-green-500 font-bold">✓ OK</span> : <select className="bg-slate-700 border border-slate-600 rounded text-[10px] w-full text-white" onChange={(e) => handleAssignToBatch(row.code, e.target.value)}><option>Asignar...</option>{uniqueBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</select>}</td>
+                                            <td className="p-2">
+                                                {row.found ? <span className="text-green-500 font-bold">✓ OK</span> : 
+                                                <BatchSearch batches={uniqueBatches} onAssign={(batchId) => handleAssignToBatch(row.code, batchId)} />
+                                                }
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -560,7 +598,7 @@ const TabAnalytics = ({ transactions, currentPeriod, availableModels, trm }) => 
                 <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center">
                     <h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3>
                     <div className="text-3xl font-black text-white uppercase">{currentPeriod}</div>
-                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.17 SYSTEM</div>
+                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.18 SYSTEM</div>
                 </div>
             </div>
             
