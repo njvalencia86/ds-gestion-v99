@@ -43,7 +43,7 @@ const getMonthOptions = () => {
 };
 
 // =================================================================================================
-// 🔒 COMPONENTE DE LOGIN AHORA (SEGURIDAD v5.9)
+// 🔒 COMPONENTE DE LOGIN
 // =================================================================================================
 const LoginScreen = ({ auth }) => {
     const [email, setEmail] = useState('');
@@ -91,10 +91,10 @@ const LoginScreen = ({ auth }) => {
 };
 
 // =================================================================================================
-// 📱 APP PRINCIPAL
+// 📱 APP PRINCIPAL (CORREGIDA)
 // =================================================================================================
 const App = () => {
-    // Estados
+    // 1. Estados (Hooks)
     const [db, setDb] = useState(null);
     const [auth, setAuth] = useState(null);
     const [user, setUser] = useState(null);
@@ -109,7 +109,19 @@ const App = () => {
     const [availableModels, setAvailableModels] = useState(INITIAL_MODELOS);
     const [currentPeriod, setCurrentPeriod] = useState(new Date().toISOString().slice(0, 7));
 
-    // Inicialización
+    // 2. Cálculos (useMemo) - ¡MOVIDOS AQUÍ ARRIBA PARA EVITAR EL ERROR!
+    const inventoryMap = useMemo(() => {
+        const map = {};
+        inventoryList.forEach(item => map[item.itemId] = item.percentages);
+        return map;
+    }, [inventoryList]);
+
+    const filteredTransactions = useMemo(() => transactions.filter(t => {
+        const tPeriod = t.period || (t.createdAt ? t.createdAt.toDate().toISOString().slice(0,7) : 'Sin Fecha');
+        return tPeriod === currentPeriod;
+    }), [transactions, currentPeriod]);
+
+    // 3. Efectos (useEffect)
     useEffect(() => {
         try {
             const app = initializeApp(firebaseConfig);
@@ -125,7 +137,6 @@ const App = () => {
         } catch (e) { console.error("Init Error:", e); }
     }, []);
 
-    // Carga de datos (Solo si hay usuario)
     useEffect(() => {
         if (!user || !db) return;
         const qInv = query(collection(db, `${COLLECTION_PATH}/item_owners`));
@@ -140,21 +151,9 @@ const App = () => {
         setTimeout(() => setNotification(null), 5000);
     };
 
-    // --- RENDERIZADO: LOGIN O APP ---
+    // 4. Renderizado Condicional (Returns) - ¡AHORA SÍ VAN AL FINAL!
     if (!isAuthReady) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-cyan-500 font-mono animate-pulse">CARGANDO SISTEMA...</div>;
     if (!user) return <LoginScreen auth={auth} />;
-
-    // --- APP PROTEGIDA ---
-    const inventoryMap = useMemo(() => {
-        const map = {};
-        inventoryList.forEach(item => map[item.itemId] = item.percentages);
-        return map;
-    }, [inventoryList]);
-
-    const filteredTransactions = useMemo(() => transactions.filter(t => {
-        const tPeriod = t.period || (t.createdAt ? t.createdAt.toDate().toISOString().slice(0,7) : 'Sin Fecha');
-        return tPeriod === currentPeriod;
-    }), [transactions, currentPeriod]);
 
     return (
         <div className={`min-h-screen font-sans flex flex-col ${activeTab === 'analytics' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-800'}`}>
