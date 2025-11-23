@@ -43,7 +43,7 @@ const getMonthOptions = () => {
 };
 
 // =================================================================================================
-// 🔒 COMPONENTE DEE LOGIN
+// 🔒 COMPONENTE DE LOGIN
 // =================================================================================================
 const LoginScreen = ({ auth }) => {
     const [email, setEmail] = useState('');
@@ -302,13 +302,13 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
 };
 
 // =================================================================================================
-// 💵 TAB 2: FACTURACIÓN FUTURISTA (v5.12 - DARK MATRIX)
+// 💵 TAB 2: FACTURACIÓN FUTURISTA
 // =================================================================================================
 const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, showNotify, COLLECTION_PATH, currentPeriod }) => {
     const [rawInput, setRawInput] = useState('');
     const [processing, setProcessing] = useState(false);
     const [previewData, setPreviewData] = useState([]);
-    const [deletingAll, setDeletingAll] = useState(false); // Estado para borrar todo
+    const [deletingAll, setDeletingAll] = useState(false);
 
     const uniqueBatches = useMemo(() => {
         const map = new Map();
@@ -358,36 +358,26 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
 
     const handleDeleteTransaction = async (id) => { if(!window.confirm('¿Borrar?')) return; try { await deleteDoc(doc(db, `${COLLECTION_PATH}/earnings_records`, id)); showNotify('success', 'Borrado'); } catch (e) { showNotify('error', 'Error'); } };
 
-    // --- NUEVA FUNCIÓN: BORRAR TODO EL PERIODO ---
     const handleClearPeriod = async () => {
         if (transactions.length === 0) return;
         if (!window.confirm(`⚠️ PELIGRO ⚠️\n\n¿Estás seguro de que quieres ELIMINAR TODAS las facturas de ${currentPeriod}?\n\nEsta acción NO se puede deshacer.`)) return;
-        
         setDeletingAll(true);
         try {
             const batch = writeBatch(db);
-            transactions.forEach(t => {
-                batch.delete(doc(db, `${COLLECTION_PATH}/earnings_records`, t.id));
-            });
+            transactions.forEach(t => { batch.delete(doc(db, `${COLLECTION_PATH}/earnings_records`, t.id)); });
             await batch.commit();
             showNotify('success', `Historial de ${currentPeriod} eliminado completamente.`);
-        } catch (e) {
-            console.error(e);
-            showNotify('error', 'Error al intentar borrar todo.');
-        }
+        } catch (e) { console.error(e); showNotify('error', 'Error al intentar borrar todo.'); }
         setDeletingAll(false);
     };
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 no-print">
             <div className="lg:col-span-5 space-y-4">
-                {/* TRM FUTURISTA */}
                 <div className="bg-slate-800/80 p-4 rounded-xl shadow-lg border border-green-500/30 backdrop-blur-sm flex justify-between items-center neon-box-green">
                     <span className="text-xs font-bold text-green-400 uppercase tracking-widest">TRM ACTIVA (COP)</span>
                     <input type="number" value={trm} onChange={e => setTrm(parseFloat(e.target.value))} className="text-right font-mono font-black text-xl text-green-300 bg-transparent w-32 outline-none border-b border-green-500/50 focus:border-green-400 neon-green-text" />
                 </div>
-                
-                {/* ÁREA DE FACTURACIÓN MATRIX */}
                 <div className="bg-black/40 p-6 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full blur-xl pointer-events-none"></div>
                     <div className="flex justify-between items-center mb-2">
@@ -405,7 +395,6 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
             </div>
 
             <div className="lg:col-span-7 space-y-6">
-                {/* VISTA PREVIA */}
                 {rawInput && (
                     <div className="bg-slate-800 border border-slate-600 rounded-xl shadow p-4 animate-fadeIn">
                         <h3 className="font-bold text-green-400 mb-2 text-sm uppercase tracking-wider">Vista Previa de Datos</h3>
@@ -426,7 +415,6 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                     </div>
                 )}
 
-                {/* HISTORIAL FUTURISTA CON BORRADO MASIVO */}
                 <div className="bg-slate-800/80 rounded-xl shadow-lg border border-slate-600 p-6 flex flex-col h-[500px] backdrop-blur-sm">
                     <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
                         <div>
@@ -448,14 +436,9 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                         ))}
                     </div>
 
-                    {/* BOTÓN DE PÁNICO - BORRAR TODO */}
                     {transactions.length > 0 && (
                         <div className="mt-4 pt-4 border-t border-slate-700">
-                            <button 
-                                onClick={handleClearPeriod} 
-                                disabled={deletingAll}
-                                className="w-full bg-red-900/30 hover:bg-red-900/80 border border-red-800 text-red-400 hover:text-white font-bold py-2 rounded-lg transition flex justify-center items-center gap-2 uppercase text-xs tracking-widest"
-                            >
+                            <button onClick={handleClearPeriod} disabled={deletingAll} className="w-full bg-red-900/30 hover:bg-red-900/80 border border-red-800 text-red-400 hover:text-white font-bold py-2 rounded-lg transition flex justify-center items-center gap-2 uppercase text-xs tracking-widest">
                                 {deletingAll ? 'ELIMINANDO...' : '💀 BORRAR TODO EL HISTORIAL DE ESTE MES'}
                             </button>
                         </div>
@@ -508,7 +491,28 @@ const TabAnalytics = ({ transactions, currentPeriod, availableModels, trm }) => 
                 <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center"><h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3><div className="text-3xl font-black text-white uppercase">{currentPeriod}</div><div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.12 SYSTEM</div></div>
             </div>
             <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-3xl backdrop-blur-sm"><h3 className="text-white text-lg font-bold uppercase tracking-widest mb-8 flex items-center gap-2"><span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>Rendimiento por Modelo</h3>{periodStats.sortedModels.length === 0 ? (<div className="text-center py-10 text-slate-500">No hay actividad registrada en este periodo.</div>) : (<div className="space-y-4">{periodStats.sortedModels.map((item, idx) => { const maxVal = periodStats.sortedModels[0].val; const percent = (item.val / maxVal) * 100; const colors = ['bg-cyan-500', 'bg-purple-500', 'bg-pink-500', 'bg-orange-500']; const color = colors[idx % colors.length]; return (<div key={item.name} className="relative group"><div className="flex justify-between text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider"><span>#{idx+1} {item.name}</span><span className="text-white">${item.val.toFixed(2)}</span></div><div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 relative"><div className={`h-full ${color} rounded-full relative transition-all duration-1000 ease-out group-hover:brightness-125`} style={{ width: `${percent}%` }}><div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div></div></div></div>); })}</div>)}</div>
-            <div className="mt-8"><h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Tendencia Global (Últimos Meses)</h3><div className="flex items-end gap-2 h-32 opacity-80">{historyStats.map(h => { const max = Math.max(...historyStats.map(x=>x.total)); const hPercent = max > 0 ? (h.total / max) * 100 : 0; const isCurrent = h.month === currentPeriod; return (<div key={h.month} className="flex-1 flex flex-col justify-end items-center group"><div className="text-[10px] text-slate-400 mb-1 opacity-0 group-hover:opacity-100 transition">${Math.round(h.total)}</div><div className={`w-full rounded-t-sm transition-all duration-500 ${isCurrent ? 'bg-cyan-400 shadow-[0_0_15px_#22d3ee]' : 'bg-slate-700 hover:bg-slate-600'}`} style={{ height: `${Math.max(hPercent, 5)}%` }}></div><div className={`text-[9px] mt-1 ${isCurrent ? 'text-cyan-400 font-bold' : 'text-slate-500'}`}>{h.month.split('-')[1]}</div></div>) })}</div></div>
+            
+            {/* --- CÓDIGO EXPANDIDO PARA EVITAR ERRORES --- */}
+            <div className="mt-8">
+                <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Tendencia Global (Últimos Meses)</h3>
+                <div className="flex items-end gap-2 h-32 opacity-80">
+                    {historyStats.map(h => {
+                        const max = Math.max(...historyStats.map(x => x.total));
+                        const hPercent = max > 0 ? (h.total / max) * 100 : 0;
+                        const isCurrent = h.month === currentPeriod;
+                        return (
+                            <div key={h.month} className="flex-1 flex flex-col justify-end items-center group">
+                                <div className="text-[10px] text-slate-400 mb-1 opacity-0 group-hover:opacity-100 transition">${Math.round(h.total)}</div>
+                                <div 
+                                    className={`w-full rounded-t-sm transition-all duration-500 ${isCurrent ? 'bg-cyan-400 shadow-[0_0_15px_#22d3ee]' : 'bg-slate-700 hover:bg-slate-600'}`} 
+                                    style={{ height: `${Math.max(hPercent, 5)}%` }}
+                                ></div>
+                                <div className={`text-[9px] mt-1 ${isCurrent ? 'text-cyan-400 font-bold' : 'text-slate-500'}`}>{h.month.split('-')[1]}</div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
         </div>
     );
 };
