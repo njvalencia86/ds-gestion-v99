@@ -69,7 +69,7 @@ const LoginScreen = ({ auth }) => {
              <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-purple-600"></div>
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.12</span></h1>
+                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.13</span></h1>
                     <p className="text-slate-400 text-xs font-mono">SISTEMA DE ACCESO RESTRINGIDO</p>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -174,7 +174,7 @@ const App = () => {
             <div className={`p-4 shadow-lg no-print sticky top-0 z-50 transition-colors duration-500 ${activeTab === 'analytics' || activeTab === 'billing' ? 'bg-black/90 backdrop-blur-md border-b border-cyan-900' : 'bg-slate-900 text-white'}`}>
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-4">
-                        <h1 className={`text-xl font-black tracking-tight ${activeTab === 'analytics' || activeTab === 'billing' ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text' : ''}`}>DS GESTIÓN <span className="text-orange-400">v5.12</span></h1>
+                        <h1 className={`text-xl font-black tracking-tight ${activeTab === 'analytics' || activeTab === 'billing' ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text' : ''}`}>DS GESTIÓN <span className="text-orange-400">v5.13</span></h1>
                         <button onClick={() => signOut(auth)} className="bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white text-[10px] px-2 py-1 rounded border border-red-500/50 transition uppercase font-bold">SALIR</button>
                     </div>
                     <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
@@ -385,7 +385,7 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                     </div>
                     <textarea 
                         className="w-full h-64 p-4 border border-slate-600 rounded-xl text-xs font-mono outline-none resize-none bg-slate-900/90 text-green-400 shadow-inner focus:border-green-500 focus:shadow-[0_0_15px_rgba(34,197,94,0.3)] transition" 
-                        placeholder={`>> SYSTEM READY...\n>> INGRESE DATOS DEL PDF...\n\n6879166 — $5.39\n...`} 
+                        placeholder="SYSTEM READY... INGRESE DATOS DEL PDF..." 
                         value={rawInput} onChange={e => setRawInput(e.target.value)}
                     ></textarea>
                     <button onClick={handleProcess} disabled={processing || previewData.length === 0} className="w-full mt-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-black py-4 rounded-xl shadow-lg transition transform hover:scale-[1.02] disabled:opacity-50 tracking-widest">
@@ -427,7 +427,7 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2">
-                        {transactions.length === 0 ? <p className="text-center text-slate-500 py-10 font-mono">>> SIN REGISTROS <<</p> : 
+                        {transactions.length === 0 ? <p className="text-center text-slate-500 py-10 font-mono"> SIN REGISTROS </p> : 
                         transactions.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).map(t => (
                             <div key={t.id} className="p-2 border border-slate-700/50 rounded bg-slate-900/50 flex justify-between items-center text-xs hover:border-green-500/50 transition group">
                                 <div><span className="font-mono font-bold text-green-300 mr-2">{t.itemId}</span><span className="text-slate-500">{new Date(t.createdAt?.seconds*1000).toLocaleTimeString()}</span></div>
@@ -529,7 +529,7 @@ const TabAnalytics = ({ transactions, currentPeriod, availableModels, trm }) => 
                 <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center">
                     <h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3>
                     <div className="text-3xl font-black text-white uppercase">{currentPeriod}</div>
-                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.12 SYSTEM</div>
+                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.13 SYSTEM</div>
                 </div>
             </div>
             
@@ -559,13 +559,16 @@ const TabAnalytics = ({ transactions, currentPeriod, availableModels, trm }) => 
                 <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Tendencia Global (Últimos Meses)</h3>
                 <div className="flex items-end gap-2 h-32 opacity-80">
                     {historyStats.map(h => {
-                        const max = Math.max(...historyStats.map(x=>x.total));
+                        const max = Math.max(...historyStats.map(x => x.total));
                         const hPercent = max > 0 ? (h.total / max) * 100 : 0;
                         const isCurrent = h.month === currentPeriod;
                         return (
                             <div key={h.month} className="flex-1 flex flex-col justify-end items-center group">
                                 <div className="text-[10px] text-slate-400 mb-1 opacity-0 group-hover:opacity-100 transition">${Math.round(h.total)}</div>
-                                <div className={`w-full rounded-t-sm transition-all duration-500 ${isCurrent ? 'bg-cyan-400 shadow-[0_0_15px_#22d3ee]' : 'bg-slate-700 hover:bg-slate-600'}`} style={{ height: `${Math.max(hPercent, 5)}%` }}></div>
+                                <div 
+                                    className={`w-full rounded-t-sm transition-all duration-500 ${isCurrent ? 'bg-cyan-400 shadow-[0_0_15px_#22d3ee]' : 'bg-slate-700 hover:bg-slate-600'}`} 
+                                    style={{ height: `${Math.max(hPercent, 5)}%` }}
+                                ></div>
                                 <div className={`text-[9px] mt-1 ${isCurrent ? 'text-cyan-400 font-bold' : 'text-slate-500'}`}>{h.month.split('-')[1]}</div>
                             </div>
                         )
