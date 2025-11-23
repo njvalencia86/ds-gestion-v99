@@ -69,7 +69,7 @@ const LoginScreen = ({ auth }) => {
              <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-purple-600"></div>
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.15</span></h1>
+                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.16</span></h1>
                     <p className="text-slate-400 text-xs font-mono">SISTEMA DE ACCESO RESTRINGIDO</p>
                 </div>
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -150,7 +150,6 @@ const App = () => {
     if (!isAuthReady) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-cyan-500 font-mono animate-pulse">CARGANDO SISTEMA...</div>;
     if (!user) return <LoginScreen auth={auth} />;
 
-    // --- MODO OSCURO GLOBAL ACTIVADO SIEMPRE ---
     return (
         <div className="min-h-screen font-sans flex flex-col bg-slate-900 text-white">
             <style>{`
@@ -175,7 +174,7 @@ const App = () => {
             <div className="p-4 shadow-lg no-print sticky top-0 z-50 transition-colors duration-500 bg-black/90 backdrop-blur-md border-b border-cyan-900">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text">DS GESTIÓN <span className="text-orange-400">v5.15</span></h1>
+                        <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text">DS GESTIÓN <span className="text-orange-400">v5.16</span></h1>
                         <button onClick={() => signOut(auth)} className="bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white text-[10px] px-2 py-1 rounded border border-red-500/50 transition uppercase font-bold">SALIR</button>
                     </div>
                     <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
@@ -212,9 +211,6 @@ const TabButton = ({ id, label, icon, active, set, color }) => (
     </button>
 );
 
-// =================================================================================================
-// 🗄️ TAB 1: BASE DE DATOS (FUTURISTA)
-// =================================================================================================
 const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, showNotify, COLLECTION_PATH }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedModels, setSelectedModels] = useState([]);
@@ -305,14 +301,11 @@ const TabDatabase = ({ db, inventoryList, availableModels, setAvailableModels, s
     );
 };
 
-// =================================================================================================
-// 💵 TAB 2: FACTURACIÓN FUTURISTA (CON DELETE INLINE)
-// =================================================================================================
 const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, showNotify, COLLECTION_PATH, currentPeriod }) => {
     const [rawInput, setRawInput] = useState('');
     const [processing, setProcessing] = useState(false);
     const [previewData, setPreviewData] = useState([]);
-    const [confirmClear, setConfirmClear] = useState(false); // NUEVO ESTADO PARA CONFIRMACIÓN INLINE
+    const [confirmClear, setConfirmClear] = useState(false);
 
     const uniqueBatches = useMemo(() => {
         const map = new Map();
@@ -351,7 +344,9 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                 const earnings = {};
                 const percentages = inventory[item.code];
                 Object.entries(percentages).forEach(([owner, pct]) => earnings[owner] = (item.value * pct) / 100);
-                batch.set(doc(collection(db, `${COLLECTION_PATH}/earnings_records`), null), { itemId: item.code, usdValue: item.value, ganancias: earnings, rawLine: item.original, period: currentPeriod, createdAt: serverTimestamp() });
+                // --- CORRECCIÓN CLAVE AQUÍ (v5.16) ---
+                const newDocRef = doc(collection(db, `${COLLECTION_PATH}/earnings_records`));
+                batch.set(newDocRef, { itemId: item.code, usdValue: item.value, ganancias: earnings, rawLine: item.original, period: currentPeriod, createdAt: serverTimestamp() });
             });
             await batch.commit();
             showNotify('success', `Guardados ${validItems.length} items en ${currentPeriod}`);
@@ -362,12 +357,10 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
 
     const handleDeleteTransaction = async (id) => { if(!window.confirm('¿Borrar?')) return; try { await deleteDoc(doc(db, `${COLLECTION_PATH}/earnings_records`, id)); showNotify('success', 'Borrado'); } catch (e) { showNotify('error', 'Error'); } };
 
-    // --- NUEVA LÓGICA: BORRADO INLINE SIN VENTANA EMERGENTE ---
     const handleClearPeriod = async () => {
         if (transactions.length === 0) return;
         
         if (confirmClear) {
-            // SEGUNDO CLIC: BORRAR DE VERDAD
             try {
                 const batch = writeBatch(db);
                 transactions.forEach(t => { batch.delete(doc(db, `${COLLECTION_PATH}/earnings_records`, t.id)); });
@@ -376,9 +369,7 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
                 setConfirmClear(false);
             } catch (e) { console.error(e); showNotify('error', 'Error al intentar borrar todo.'); }
         } else {
-            // PRIMER CLIC: PEDIR CONFIRMACIÓN
             setConfirmClear(true);
-            // Si no confirma en 3 segundos, se cancela
             setTimeout(() => setConfirmClear(false), 3000);
         }
     };
@@ -450,7 +441,6 @@ const TabBilling = ({ db, inventory, inventoryList, transactions, trm, setTrm, s
 
                     {transactions.length > 0 && (
                         <div className="mt-4 pt-4 border-t border-slate-700">
-                            {/* --- BOTÓN DE BORRADO INTELIGENTE SIN VENTANA EMERGENTE --- */}
                             <button 
                                 onClick={handleClearPeriod} 
                                 className={`w-full border font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 uppercase text-xs tracking-widest ${confirmClear ? 'bg-red-600 border-red-500 text-white animate-pulse shadow-[0_0_20px_rgba(220,38,38,0.6)]' : 'bg-red-900/20 border-red-900/50 text-red-400 hover:bg-red-900/40'}`}
@@ -545,7 +535,7 @@ const TabAnalytics = ({ transactions, currentPeriod, availableModels, trm }) => 
                 <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center">
                     <h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3>
                     <div className="text-3xl font-black text-white uppercase">{currentPeriod}</div>
-                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.15 SYSTEM</div>
+                    <div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.16 SYSTEM</div>
                 </div>
             </div>
             
