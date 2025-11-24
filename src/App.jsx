@@ -14,7 +14,9 @@ const firebaseConfig = {
 };
 
 // --- CONSTANTES ---
+// Se eliminó el segundo logo
 const LOGO_URL = "https://ugc.production.linktr.ee/2760c98b-94c6-4da8-bf4a-1744413717c3_LogoSolo.png?io=true&size=avatar-v3_0";
+
 const INITIAL_MODELOS = [
     'KATHY', 'TIMMY', 'LEO', 'JACOB', 'LEYLA', 'LAURY', 'EMMA', 'HANNAH',
     'SPEEDY', 'JOSE', 'ANDREW', 'CARLOS', 'DUKE', 'JEN', 'JOSE LUIS', 
@@ -45,7 +47,7 @@ const getMonthOptions = () => {
 };
 
 // =================================================================================================
-// 🔒 COMPONENTE DE LOGIN
+// 🔒 COMPONENTE DE LOGIN (ACTUALIZADO: UN SOLO LOGO CENTRADO)
 // =================================================================================================
 const LoginScreen = ({ auth }) => {
     const [email, setEmail] = useState('');
@@ -70,11 +72,16 @@ const LoginScreen = ({ auth }) => {
         <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
              <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-cyan-500/30 w-full max-w-md relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-purple-600"></div>
+                
+                {/* HEADER DEL LOGIN: Volvemos al diseño centrado con un solo logo */}
                 <div className="text-center mb-8 flex flex-col items-center">
                     <img src={LOGO_URL} alt="DS Logo" className="w-20 h-20 rounded-full shadow-lg mb-4 border-2 border-cyan-500/30" />
-                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTIÓN <span className="text-cyan-400">v5.24</span></h1>
-                    <p className="text-slate-400 text-xs font-mono">SISTEMA DE ACCESO RESTRINGIDO</p>
+                    <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2">DS GESTION <span className="text-cyan-400">V5.26</span></h1>
+                    <div className="w-full text-center">
+                        <p className="text-sm font-black text-teal-400 tracking-[0.25em] uppercase drop-shadow-[0_0_5px_rgba(45,212,191,0.5)] mt-1">✨ EDICIÓN MANYVIDS ✨</p>
+                    </div>
                 </div>
+
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div>
                         <label className="text-cyan-400 text-xs font-bold uppercase block mb-2">Usuario Autorizado</label>
@@ -120,7 +127,6 @@ const App = () => {
     }, [inventoryList]);
 
     // --- FILTRO MAESTRO DE TRANSACCIONES ---
-    // Este filtro controla qué datos ven las pestañas según el mes seleccionado
     const filteredTransactions = useMemo(() => transactions.filter(t => {
         const tPeriod = t.period || (t.createdAt ? t.createdAt.toDate().toISOString().slice(0,7) : 'Sin Fecha');
         return tPeriod === currentPeriod;
@@ -176,30 +182,43 @@ const App = () => {
                 .neon-box { box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
                 .neon-box-green { box-shadow: 0 0 20px rgba(74, 222, 128, 0.2); }
                 .grid-bg { background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px); background-size: 20px 20px; }
+                .glow-sm { text-shadow: 0 0 5px rgba(74, 222, 128, 0.5); }
             `}</style>
 
-            {/* HEADER */}
+            {/* HEADER (ACTUALIZADO: UN SOLO LOGO) */}
             <div className="p-3 shadow-lg no-print sticky top-0 z-50 transition-colors duration-500 bg-black/90 backdrop-blur-md border-b border-cyan-900">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="max-w-[90rem] mx-auto flex flex-col xl:flex-row justify-between items-center gap-4">
+                    
+                    {/* --- PARTE IZQUIERDA: LOGO DS + TITULOS + SALIR --- */}
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-3">
+                            {/* LOGO IZQUIERDO (DS) */}
                             <img src={LOGO_URL} alt="DS Logo" className="w-10 h-10 rounded-full object-cover shadow-sm border border-white/10" />
-                            <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text">DS GESTIÓN <span className="text-orange-400">v5.24</span></h1>
+                            <div className="flex flex-col justify-center">
+                                <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text leading-tight whitespace-nowrap">DS GESTION <span className="text-orange-400">V5.26</span></h1>
+                                <span className="text-xs md:text-sm font-black text-teal-400 tracking-[0.2em] uppercase drop-shadow-[0_0_5px_rgba(45,212,191,0.5)] mt-0.5 whitespace-nowrap">✨ EDICIÓN MANYVIDS ✨</span>
+                            </div>
                         </div>
                         <button onClick={() => signOut(auth)} className="bg-red-500/20 hover:bg-red-500 text-red-200 hover:text-white text-[10px] px-2 py-1 rounded border border-red-500/50 transition uppercase font-bold">SALIR</button>
                     </div>
-                    <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
-                        <span className="text-xs font-bold text-slate-400 uppercase ml-2">Periodo:</span>
-                        <select value={currentPeriod} onChange={(e) => setCurrentPeriod(e.target.value)} className="bg-slate-900 text-white font-bold text-sm py-1 px-3 rounded border border-slate-600 outline-none focus:border-cyan-500">
-                            {getMonthOptions().map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                        </select>
-                    </div>
-                    <div className="flex bg-slate-800 rounded-lg p-1 gap-1 overflow-x-auto">
-                        <TabButton id="database" label="Base Datos" icon="📦" active={activeTab} set={setActiveTab} color="indigo" />
-                        <TabButton id="billing" label="Facturación" icon="💳" active={activeTab} set={setActiveTab} color="green" />
-                        <TabButton id="reports" label="Reporte" icon="📄" active={activeTab} set={setActiveTab} color="blue" />
-                        <TabButton id="analytics" label="Estadísticas" icon="📈" active={activeTab} set={setActiveTab} color="purple" />
-                        <TabButton id="partners" label="SOCIOS" icon="💰" active={activeTab} set={setActiveTab} color="orange" />
+
+                    {/* --- PARTE DERECHA: CONTROLES (SIN EL SEGUNDO LOGO) --- */}
+                    <div className="flex items-center gap-4 xl:gap-6">
+                        {/* Selector Periodo */}
+                        <div className="flex items-center gap-2 bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
+                            <span className="text-xs font-bold text-slate-400 uppercase ml-2">Periodo:</span>
+                            <select value={currentPeriod} onChange={(e) => setCurrentPeriod(e.target.value)} className="bg-slate-900 text-white font-bold text-sm py-1 px-3 rounded border border-slate-600 outline-none focus:border-cyan-500">
+                                {getMonthOptions().map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                            </select>
+                        </div>
+                        {/* Pestañas */}
+                        <div className="flex bg-slate-800 rounded-lg p-1 gap-1 overflow-x-auto custom-scrollbar">
+                            <TabButton id="database" label="Base Datos" icon="📦" active={activeTab} set={setActiveTab} color="indigo" />
+                            <TabButton id="billing" label="Facturación" icon="💳" active={activeTab} set={setActiveTab} color="green" />
+                            <TabButton id="reports" label="Reporte" icon="📄" active={activeTab} set={setActiveTab} color="blue" />
+                            <TabButton id="analytics" label="Estadísticas" icon="📈" active={activeTab} set={setActiveTab} color="purple" />
+                            <TabButton id="partners" label="SOCIOS" icon="💰" active={activeTab} set={setActiveTab} color="orange" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -212,7 +231,6 @@ const App = () => {
                 {activeTab === 'billing' && <TabBilling db={db} inventory={inventoryMap} inventoryList={inventoryList} transactions={filteredTransactions} trm={trm} setTrm={setTrm} showNotify={showNotify} COLLECTION_PATH={COLLECTION_PATH} currentPeriod={currentPeriod} manyvidsCop={manyvidsCop} setManyvidsCop={setManyvidsCop} />}
                 {activeTab === 'reports' && <TabReports transactions={filteredTransactions} trm={trm} currentPeriod={currentPeriod} manyvidsCop={manyvidsCop} />}
                 {activeTab === 'analytics' && <TabAnalytics transactions={transactions} currentPeriod={currentPeriod} availableModels={availableModels} trm={trm} />}
-                {/* CORRECCIÓN AQUÍ: Ahora pasamos 'filteredTransactions' en lugar de 'transactions' */}
                 {activeTab === 'partners' && <TabPartners transactions={filteredTransactions} currentPeriod={currentPeriod} trm={trm} manyvidsCop={manyvidsCop} />}
             </div>
         </div>
@@ -531,7 +549,7 @@ const TabAnalytics = ({ transactions, currentPeriod, availableModels, trm }) => 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="relative overflow-hidden bg-slate-800/80 border border-cyan-500/30 p-6 rounded-2xl neon-box"><div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">💰</div><h3 className="text-cyan-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Total Facturado</h3><div className="text-4xl font-black text-white mb-1 tracking-tight">${periodStats.totalUSD.toLocaleString('en-US', {minimumFractionDigits: 2})} <span className="text-lg text-slate-500">USD</span></div><div className="text-sm font-mono text-cyan-300 opacity-80">≈ ${(periodStats.totalUSD * trm).toLocaleString('es-CO')} COP</div><div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-cyan-500 h-full shadow-[0_0_10px_#22d3ee]" style={{ width: '100%' }}></div></div></div>
                 <div className="relative overflow-hidden bg-slate-800/80 border border-purple-500/30 p-6 rounded-2xl neon-box"><div className="absolute top-0 right-0 p-4 opacity-20 text-6xl">🏆</div><h3 className="text-purple-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Modelo Top (MVP)</h3>{periodStats.mvp ? (<><div className="text-3xl font-black text-white mb-1 truncate">{periodStats.mvp.name}</div><div className="text-xl font-bold text-purple-300">${periodStats.mvp.val.toFixed(2)} USD</div></>) : <div className="text-slate-500 italic">Sin datos aún</div>}<div className="w-full bg-slate-700 h-1 mt-4 rounded-full overflow-hidden"><div className="bg-purple-500 h-full shadow-[0_0_10px_#a855f7]" style={{ width: '75%' }}></div></div></div>
-                <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center"><h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3><div className="text-3xl font-black text-white uppercase">{currentPeriod}</div><div className="text-xs text-slate-400 mt-2">DS GESTIÓN v5.24 SYSTEM</div></div>
+                <div className="relative overflow-hidden bg-slate-800/80 border border-orange-500/30 p-6 rounded-2xl neon-box flex flex-col justify-center items-center text-center"><h3 className="text-orange-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Periodo Activo</h3><div className="text-3xl font-black text-white uppercase">{currentPeriod}</div><div className="text-xs text-slate-400 mt-2">DS GESTION MANYVIDS V5.26 SYSTEM</div></div>
             </div>
             <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-3xl backdrop-blur-sm"><h3 className="text-white text-lg font-bold uppercase tracking-widest mb-8 flex items-center gap-2"><span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>Rendimiento por Modelo</h3>{periodStats.sortedModels.length === 0 ? (<div className="text-center py-10 text-slate-500">No hay actividad registrada en este periodo.</div>) : (<div className="space-y-4">{periodStats.sortedModels.map((item, idx) => { const maxVal = periodStats.sortedModels[0].val; const percent = (item.val / maxVal) * 100; const colors = ['bg-cyan-500', 'bg-purple-500', 'bg-pink-500', 'bg-orange-500']; const color = colors[idx % colors.length]; return (<div key={item.name} className="relative group"><div className="flex justify-between text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider"><span>#{idx+1} {item.name}</span><span className="text-white">${item.val.toFixed(2)}</span></div><div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 relative"><div className={`h-full ${color} rounded-full relative transition-all duration-1000 ease-out group-hover:brightness-125`} style={{ width: `${percent}%` }}><div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div></div></div></div>); })}</div>)}</div>
             <div className="mt-8"><h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4">Tendencia Global (Últimos Meses)</h3><div className="flex items-end gap-2 h-32 opacity-80">{historyStats.map(h => { const max = Math.max(...historyStats.map(x=>x.total)); const hPercent = max > 0 ? (h.total / max) * 100 : 0; const isCurrent = h.month === currentPeriod; return (<div key={h.month} className="flex-1 flex flex-col justify-end items-center group"><div className="text-[10px] text-slate-400 mb-1 opacity-0 group-hover:opacity-100 transition">${Math.round(h.total)}</div><div className={`w-full rounded-t-sm transition-all duration-500 ${isCurrent ? 'bg-cyan-400 shadow-[0_0_15px_#22d3ee]' : 'bg-slate-700 hover:bg-slate-600'}`} style={{ height: `${Math.max(hPercent, 5)}%` }}></div><div className={`text-[9px] mt-1 ${isCurrent ? 'text-cyan-400 font-bold' : 'text-slate-500'}`}>{h.month.split('-')[1]}</div></div>) })}</div></div>
